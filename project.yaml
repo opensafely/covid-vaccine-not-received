@@ -11,10 +11,10 @@ actions:
       highly_sensitive:
         cohort: output/input.csv
 
-  run_model:
-    run: stata-mp:latest analysis/model.do
+  transform:
+    run: python:latest python analysis/transform.py output/input.csv
     needs: [generate_study_population]
     outputs:
-      moderately_sensitive:
-        log: logs/model.log
+      highly_sensitive:
+        cohort: output/cohort.pickle
 

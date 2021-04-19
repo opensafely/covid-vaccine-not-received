@@ -1,148 +1,292 @@
-from cohortextractor import (
-    codelist,
-    codelist_from_csv,
-)
-
-covid_codes = codelist_from_csv(
-    "codelists/opensafely-covid-identification.csv",
-    system="icd10",
-    column="icd10_code",
-)
-
-covid_primary_care_positive_test = codelist_from_csv(
-    "codelists/opensafely-covid-identification-in-primary-care-probable-covid-positive-test.csv",
-    system="ctv3",
-    column="CTV3ID",
-)
-
-covid_primary_care_code = codelist_from_csv(
-    "codelists/opensafely-covid-identification-in-primary-care-probable-covid-clinical-code.csv",
-    system="ctv3",
-    column="CTV3ID",
-)
-
-covid_primary_care_sequalae = codelist_from_csv(
-    "codelists/opensafely-covid-identification-in-primary-care-probable-covid-sequelae.csv",
-    system="ctv3",
-    column="CTV3ID",
-)
-
-ethnicity_codes = codelist_from_csv(
-    "codelists/opensafely-ethnicity.csv",
-    system="ctv3",
-    column="Code",
-    category_column="Grouping_6",
-)
-ethnicity_codes_16 = codelist_from_csv(
-    "codelists/opensafely-ethnicity.csv",
-    system="ctv3",
-    column="Code",
-    category_column="Grouping_16",
-)
+from cohortextractor import codelist_from_csv
 
 
-solid_organ_transplantation_codes = codelist_from_csv(
-    "codelists/opensafely-solid-organ-transplantation.csv",
-    system="ctv3",
-    column="CTV3ID",
+# Asthma Diagnosis code
+ast = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-ast.csv",
+    system="snomed",
+    column="code",
 )
 
-lung_cancer_codes = codelist_from_csv(
-    "codelists/opensafely-lung-cancer.csv", system="ctv3", column="CTV3ID",
-)
-haematological_cancer_codes = codelist_from_csv(
-    "codelists/opensafely-haematological-cancer.csv", system="ctv3", column="CTV3ID",
-)
-bone_marrow_transplant_codes = codelist_from_csv(
-    "codelists/opensafely-bone-marrow-transplant.csv", system="ctv3", column="CTV3ID",
-)
-cystic_fibrosis_codes = codelist_from_csv(
-    "codelists/opensafely-cystic-fibrosis.csv", system="ctv3", column="CTV3ID",
+# Asthma Admission codes
+astadm = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-astadm.csv",
+    system="snomed",
+    column="code",
 )
 
-sickle_cell_disease_codes = codelist_from_csv(
-    "codelists/opensafely-sickle-cell-disease.csv", system="ctv3", column="CTV3ID",
+# Asthma systemic steroid prescription codes
+astrx = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-astrx.csv",
+    system="snomed",
+    column="code",
 )
 
-permanent_immunosuppression_codes = codelist_from_csv(
-    "codelists/opensafely-permanent-immunosuppression.csv",
-    system="ctv3",
-    column="CTV3ID",
-)
-temporary_immunosuppression_codes = codelist_from_csv(
-    "codelists/opensafely-temporary-immunosuppression.csv",
-    system="ctv3",
-    column="CTV3ID",
-)
-chronic_cardiac_disease_codes = codelist_from_csv(
-    "codelists/opensafely-chronic-cardiac-disease.csv", system="ctv3", column="CTV3ID",
-)
-intellectual_disability_including_downs_syndrome_codes = codelist_from_csv(
-    "codelists/opensafely-intellectual-disability-including-downs-syndrome.csv",
-    system="ctv3",
-    column="CTV3ID",
-)
-dialysis_codes = codelist_from_csv(
-    "codelists/opensafely-dialysis.csv", system="ctv3", column="CTV3ID",
-)
-other_respiratory_conditions_codes = codelist_from_csv(
-    "codelists/opensafely-other-respiratory-conditions.csv",
-    system="ctv3",
-    column="CTV3ID",
-)
-heart_failure_codes = codelist_from_csv(
-    "codelists/opensafely-heart-failure.csv", system="ctv3", column="CTV3ID",
-)
-other_heart_disease_codes = codelist_from_csv(
-    "codelists/opensafely-other-heart-disease.csv", system="ctv3", column="CTV3ID",
+# Chronic Respiratory Disease
+resp_cov = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-resp_cov.csv",
+    system="snomed",
+    column="code",
 )
 
-chronic_cardiac_disease_codes = codelist_from_csv(
-    "codelists/opensafely-chronic-cardiac-disease.csv", system="ctv3", column="CTV3ID",
+# Chronic heart disease codes
+chd_cov = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-chd_cov.csv",
+    system="snomed",
+    column="code",
 )
 
-chemotherapy_or_radiotherapy_codes = codelist_from_csv(
-    "codelists/opensafely-chemotherapy-or-radiotherapy.csv",
-    system="ctv3",
-    column="CTV3ID",
-)
-cancer_excluding_lung_and_haematological_codes = codelist_from_csv(
-    "codelists/opensafely-cancer-excluding-lung-and-haematological.csv",
-    system="ctv3",
-    column="CTV3ID",
+# Chronic kidney disease diagnostic codes
+ckd_cov = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-ckd_cov.csv",
+    system="snomed",
+    column="code",
 )
 
-current_copd_codes = codelist_from_csv(
-    "codelists/opensafely-current-copd.csv", system="ctv3", column="CTV3ID"
+# Chronic kidney disease codes - all stages
+ckd15 = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-ckd15.csv",
+    system="snomed",
+    column="code",
 )
 
-dementia_codes = codelist_from_csv(
-    "codelists/opensafely-dementia.csv", system="ctv3", column="CTV3ID"
+# Chronic kidney disease codes-stages 3 - 5
+ckd35 = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-ckd35.csv",
+    system="snomed",
+    column="code",
 )
 
-dmards_codes = codelist_from_csv(
-    "codelists/opensafely-dmards.csv", system="snomed", column="snomed_id",
+# Chronic Liver disease codes
+cld = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-cld.csv",
+    system="snomed",
+    column="code",
 )
 
-dialysis_codes = codelist_from_csv(
-    "codelists/opensafely-dialysis.csv", system="ctv3", column="CTV3ID",
+# Diabetes diagnosis codes
+diab = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-diab.csv",
+    system="snomed",
+    column="code",
 )
 
-chronic_liver_disease_codes = codelist_from_csv(
-    "codelists/opensafely-chronic-liver-disease.csv", system="ctv3", column="CTV3ID",
-)
-other_neuro_codes = codelist_from_csv(
-    "codelists/opensafely-other-neurological-conditions.csv",
-    system="ctv3",
-    column="CTV3ID",
+# Immunosuppression diagnosis codes
+immdx_cov = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-immdx_cov.csv",
+    system="snomed",
+    column="code",
 )
 
-psychosis_schizophrenia_bipolar_affective_disease_codes = codelist_from_csv(
-    "codelists/opensafely-psychosis-schizophrenia-bipolar-affective-disease.csv",
-    system="ctv3",
-    column="CTV3Code",
+# Immunosuppression medication codes
+immrx = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-immrx.csv",
+    system="snomed",
+    column="code",
 )
 
-asplenia_codes = codelist_from_csv(
-    "codelists/opensafely-asplenia.csv", system="ctv3", column="CTV3ID"
+# Chronic Neurological Disease including Significant Learning Disorder
+cns_cov = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-cns_cov.csv",
+    system="snomed",
+    column="code",
 )
+
+# Asplenia or Dysfunction of the Spleen codes
+spln_cov = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-spln_cov.csv",
+    system="snomed",
+    column="code",
+)
+
+# BMI
+bmi = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-bmi.csv",
+    system="snomed",
+    column="code",
+)
+
+# All BMI coded terms
+bmi_stage = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-bmi_stage.csv",
+    system="snomed",
+    column="code",
+)
+
+# Severe Obesity code recorded
+sev_obesity = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-sev_obesity.csv",
+    system="snomed",
+    column="code",
+)
+
+# Diabetes resolved codes
+dmres = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-dmres.csv",
+    system="snomed",
+    column="code",
+)
+
+# Severe Mental Illness codes
+sev_mental = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-sev_mental.csv",
+    system="snomed",
+    column="code",
+)
+
+# Remission codes relating to Severe Mental Illness
+smhres = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-smhres.csv",
+    system="snomed",
+    column="code",
+)
+
+# High Risk from COVID-19 code
+shield = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-shield.csv",
+    system="snomed",
+    column="code",
+)
+
+# Lower Risk from COVID-19 codes
+nonshield = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-nonshield.csv",
+    system="snomed",
+    column="code",
+)
+
+# Wider Learning Disability
+learndis = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-learndis.csv",
+    system="snomed",
+    column="code",
+)
+
+# First COVID vaccination administration codes
+covadm1 = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-covadm1.csv",
+    system="snomed",
+    column="code",
+)
+
+# Second COVID vaccination administration codes
+covadm2 = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-covadm2.csv",
+    system="snomed",
+    column="code",
+)
+
+# Pfizer BioNTech vaccination medication code
+pfdrx = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-pfdrx.csv",
+    system="snomed",
+    column="code",
+)
+
+# Oxford AstraZeneca vaccination medication code
+azdrx = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-azdrx.csv",
+    system="snomed",
+    column="code",
+)
+
+# Moderna vaccination medication code
+modrx = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-modrx.csv",
+    system="snomed",
+    column="code",
+)
+
+# Janssen vaccination medication code
+jndrx = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-jndrx.csv",
+    system="snomed",
+    column="code",
+)
+
+# COVID vaccination medication codes
+covrx = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-covrx.csv",
+    system="snomed",
+    column="code",
+)
+
+
+# Patients in long-stay nursing and residential care
+longres = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-longres.csv",
+    system="snomed",
+    column="code",
+)
+
+# Ethnicity codes
+eth2001 = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-eth2001.csv",
+    system="snomed",
+    column="code",
+    category_column="grouping_16_id",
+)
+
+# Any other ethnicity code
+non_eth2001 = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-non_eth2001.csv",
+    system="snomed",
+    column="code",
+)
+
+# Ethnicity not given - patient refused
+eth_notgiptref = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-eth_notgiptref.csv",
+    system="snomed",
+    column="code",
+)
+
+# Ethnicity not stated
+eth_notstated = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-eth_notstated.csv",
+    system="snomed",
+    column="code",
+)
+
+# Ethnicity no record
+eth_norecord = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-eth_norecord.csv",
+    system="snomed",
+    column="code",
+)
+
+# Pregnancy or Delivery codes recorded in the 8.5 months before audit run date
+pregdel = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-pregdel.csv",
+    system="snomed",
+    column="code",
+)
+
+# Pregnancy codes recorded in the 8.5 months before the audit run date
+preg = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-preg.csv",
+    system="snomed",
+    column="code",
+)
+
+# COVID vaccination contraindication codes
+covcontra = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-covcontra.csv",
+    system="snomed",
+    column="code",
+)
+
+# First COVID vaccination declined
+cov1decl = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-cov1decl.csv",
+    system="snomed",
+    column="code",
+)
+
+# Second COVID vaccination declined
+cov2decl = codelist_from_csv(
+    "codelists/primis-covid19-vacc-uptake-cov2decl.csv",
+    system="snomed",
+    column="code",
+)
+
