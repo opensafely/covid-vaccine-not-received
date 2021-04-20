@@ -19,8 +19,9 @@ extra_at_risk_cols = [group for group in at_risk_groups if group not in group_co
 extra_cols = ["patient_id", "vacc1_dat", "vacc2_dat", "wave"]
 
 vacc_cols = []
-for prefix in ["cov1decl","cov1decl_acc"]:
+for prefix in ["decl", "cov1decl_acc"]:
     vacc_cols.append(f"{prefix}_dat")
+    
 
 extra_vacc_cols = []
 for prefix in ["pf", "az", "mo", "nx", "jn", "gs", "vl"]:
@@ -58,6 +59,7 @@ def transform(cohort):
     add_high_level_ethnicity(cohort)
     add_missing_vacc_columns(cohort)
     add_vacc_dates(cohort)
+    add_vacc_decline_dates(cohort)
     # The PRIMIS spec contains a number of overlapping age bands.  Bands 1 to 12 are
     # non-overlapping and we use these by default.  We can add other age bands as
     # required.
@@ -168,6 +170,16 @@ def add_vacc_dates(cohort):
     cohort["vacc1_dat"] = cohort[["covadm1_dat", "covrx1_dat"]].min(axis=1)
     cohort["vacc2_dat"] = cohort[["covadm2_dat", "covrx2_dat"]].min(axis=1)
 
+def add_vacc_decline_dates(cohort):
+    """Record decline only if patient has had no vaccine recorded.
+    """
+    cohort["decl_dat"] = cohort["cov1decl_dat"]
+
+    # first vaccine date
+    s = cohort["decl_dat"]
+
+    # Replace declined date with null if a vaccine has been recorded
+    s.mask(cohort["vacc1_dat"].notna(), inplace=True)
 
 def add_waves(cohort):
     cohort["wave"] = 0
