@@ -509,7 +509,7 @@ study = StudyDefinition(
     cov1decl_dat=patients.with_these_clinical_events(
         codelists.cov1decl,
         returning="date",
-        find_last_match_in_period=True,
+        find_first_match_in_period=True,
         on_or_before="index_date",
         date_format="YYYY-MM-DD",
     ),
@@ -517,7 +517,7 @@ study = StudyDefinition(
     cov2decl_dat=patients.with_these_clinical_events(
         codelists.cov2decl,
         returning="date",
-        find_last_match_in_period=True,
+        find_first_match_in_period=True,
         on_or_before="index_date",
         date_format="YYYY-MM-DD",
     ),
