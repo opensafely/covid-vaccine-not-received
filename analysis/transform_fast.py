@@ -19,12 +19,11 @@ extra_at_risk_cols = [group for group in at_risk_groups if group not in group_co
 extra_cols = ["patient_id", "vacc1_dat", "vacc2_dat", "wave"]
 
 vacc_cols = []
-for prefix in ["pf", "az"]:
-    vacc_cols.append(f"{prefix}d1rx_dat")
-    vacc_cols.append(f"{prefix}d2rx_dat")
+for prefix in ["cov1decl","cov1decl_acc"]:
+    vacc_cols.append(f"{prefix}_dat")
 
 extra_vacc_cols = []
-for prefix in ["mo", "nx", "jn", "gs", "vl"]:
+for prefix in ["pf", "az", "mo", "nx", "jn", "gs", "vl"]:
     extra_vacc_cols.append(f"{prefix}d1rx_dat")
     extra_vacc_cols.append(f"{prefix}d2rx_dat")
 

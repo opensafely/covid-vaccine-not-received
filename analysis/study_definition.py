@@ -1,6 +1,6 @@
 from datetime import date
 
-from cohortextractor import StudyDefinition, patients
+from cohortextractor import StudyDefinition, patients, combine_codelists
 import codelists
 
 ref_dat = "2021-03-31"
@@ -295,6 +295,7 @@ study = StudyDefinition(
         date_format="YYYY-MM-DD",
     ),
     # First COVID vaccination administration codes
+    ### NB change this to `with_these_clinical_events` when possible
     covadm1_dat=patients.with_vaccination_record(
         returning="date",
         tpp={
@@ -309,6 +310,7 @@ study = StudyDefinition(
         date_format="YYYY-MM-DD",
     ),
     # Second COVID vaccination administration codes
+    ### NB change this to `with_these_clinical_events` when possible
     covadm2_dat=patients.with_vaccination_record(
         returning="date",
         tpp={
@@ -519,6 +521,15 @@ study = StudyDefinition(
         returning="date",
         find_first_match_in_period=True,
         on_or_before="index_date",
+        date_format="YYYY-MM-DD",
+    ),
+
+    # First COVID vaccination declined THEN accepted
+    cov1decl_acc_dat=patients.with_these_clinical_events(
+        combine_codelists(codelists.cov1decl,codelists.cov2decl), # any declined code
+        returning="date",
+        find_first_match_in_period=True,
+        on_or_before="covrx1_dat",
         date_format="YYYY-MM-DD",
     ),
 

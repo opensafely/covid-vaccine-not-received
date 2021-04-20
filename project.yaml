@@ -1,7 +1,7 @@
 version: '3.0'
 
 expectations:
-  population_size: 1000
+  population_size: 10000
 
 actions:
 
@@ -18,3 +18,9 @@ actions:
       highly_sensitive:
         cohort: output/cohort.pickle
 
+  compute_uptake_for_paper:
+    run: python:latest python analysis/compute_uptake_for_paper.py
+    needs: [transform]
+    outputs:
+      moderately_sensitive:
+        cohort: output/*/cumulative_coverage/*/*/*.csv
