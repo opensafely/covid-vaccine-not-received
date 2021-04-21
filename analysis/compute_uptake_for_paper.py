@@ -26,6 +26,7 @@ def run(input_path="output/cohort.pickle", output_dir="output"):
         ("vacc1_dat", "dose_1"),
         ("vacc_anyrecord_dat", "any_vaccine_record"),
         ("decl_dat", "declined"),
+        ("cov2not_dat", "vaccine_not_done"),
 	    ("cov1decl_acc_dat", "declined_accepted"),
     ]:
         # Compute uptake by wave
