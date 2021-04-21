@@ -534,6 +534,21 @@ study = StudyDefinition(
     ),
 
     # COVID vaccination not given (reasons other than decline)
+    cov2not_dat=patients.with_these_clinical_events(
+        codelists.cov2not,
+        returning="date",
+        find_first_match_in_period=True,
+        on_or_before="index_date",
+        date_format="YYYY-MM-DD",
+    ),
 
-
+    # COVID vaccination given (SNOMED)
+    cov2snomed_dat=patients.with_these_clinical_events(
+        codelists.covadm1,
+        returning="date",
+        find_first_match_in_period=True,
+        on_or_before="index_date",
+        on_or_after="2020-11-29",
+        date_format="YYYY-MM-DD",
+    ),
 )

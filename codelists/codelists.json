@@ -245,6 +245,42 @@
       "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/cov2decl/v1.1/",
       "downloaded_at": "2021-04-19 16:29:42.454773Z",
       "sha": "3d358a04ad7d502378d29fdc5a9f062cb04b83e3"
+    },
+    "opensafely-covid-19-vaccination-did-not-attend-first-appointment.csv": {
+      "id": "opensafely/covid-19-vaccination-did-not-attend-first-appointment/300d360f",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-19-vaccination-did-not-attend-first-appointment/300d360f/",
+      "downloaded_at": "2021-04-21 11:34:55.586084Z",
+      "sha": "8f07599ee470c4c61e0a36aee0458652307c9d00"
+    },
+    "opensafely-covid-19-vaccination-did-not-attend-second-appointment.csv": {
+      "id": "opensafely/covid-19-vaccination-did-not-attend-second-appointment/53e7a91c",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-19-vaccination-did-not-attend-second-appointment/53e7a91c/",
+      "downloaded_at": "2021-04-21 11:34:55.705890Z",
+      "sha": "b05859e04ccfcedd04a80f281f801573e026dc53"
+    },
+    "opensafely-covid-19-vaccination-first-dose-not-given.csv": {
+      "id": "opensafely/covid-19-vaccination-first-dose-not-given/6fa9dc47",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-19-vaccination-first-dose-not-given/6fa9dc47/",
+      "downloaded_at": "2021-04-21 11:34:55.808313Z",
+      "sha": "f56b16ced7a45461665f9c2400fc6a5b0fb378de"
+    },
+    "opensafely-covid-19-vaccination-second-dose-not-given.csv": {
+      "id": "opensafely/covid-19-vaccination-second-dose-not-given/569a6912",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-19-vaccination-second-dose-not-given/569a6912/",
+      "downloaded_at": "2021-04-21 11:34:55.900005Z",
+      "sha": "44b8a77604de3348dc4397d83ab765daf7338d0b"
+    },
+    "opensafely-covid-19-vaccination-unavailable.csv": {
+      "id": "opensafely/covid-19-vaccination-unavailable/21c8c2b2",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-19-vaccination-unavailable/21c8c2b2/",
+      "downloaded_at": "2021-04-21 11:34:56.010609Z",
+      "sha": "31bd232bfc7745402487a7df70019f9c02b4509c"
+    },
+    "opensafely-covid-19-vaccination-contraindication-or-allergy.csv": {
+      "id": "opensafely/covid-19-vaccination-contraindication-or-allergy/3ad835e7",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-19-vaccination-contraindication-or-allergy/3ad835e7/",
+      "downloaded_at": "2021-04-21 11:34:56.120532Z",
+      "sha": "85ef67d1c1688f0ae3f3621d4a23d2ea739eba7c"
     }
   }
 }

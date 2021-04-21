@@ -1,4 +1,4 @@
-from cohortextractor import codelist_from_csv
+from cohortextractor import codelist_from_csv, combine_codelists
 
 
 # Asthma Diagnosis code
@@ -162,19 +162,36 @@ learndis = codelist_from_csv(
     column="code",
 )
 
-# First COVID vaccination administration codes
-covadm1 = codelist_from_csv(
+# First COVID vaccination administration codes - PRIMIS
+covadm1_primis = codelist_from_csv(
     "codelists/primis-covid19-vacc-uptake-covadm1.csv",
     system="snomed",
     column="code",
 )
 
-# Second COVID vaccination administration codes
-covadm2 = codelist_from_csv(
+# Second COVID vaccination administration codes - PRIMIS
+covadm2_primis = codelist_from_csv(
     "codelists/primis-covid19-vacc-uptake-covadm2.csv",
     system="snomed",
     column="code",
 )
+
+# Any COVID vaccination administration codes - OpenSafely
+#covadm_all = codelist_from_csv(
+#    #"codelists/primis-covid19-vacc-uptake-covadm1.csv",
+#    system="snomed",
+#    column="code",
+#)
+
+covadm1 = combine_codelists(
+    covadm1_primis,
+    #covadm_all
+)
+covadm2 = combine_codelists(
+    covadm2_primis,
+    #covadm_all
+)
+
 
 # Pfizer BioNTech vaccination medication code
 pfdrx = codelist_from_csv(
@@ -269,11 +286,22 @@ preg = codelist_from_csv(
     column="code",
 )
 
-# COVID vaccination contraindication codes
-covcontra = codelist_from_csv(
+# COVID vaccination contraindication codes (PRIMIS list)
+covcontra_primis = codelist_from_csv(
     "codelists/primis-covid19-vacc-uptake-covcontra.csv",
     system="snomed",
     column="code",
+)
+# COVID vaccination contraindication codes (opensafely list)
+covcontra_all = codelist_from_csv(
+    "codelists/opensafely-covid-19-vaccination-contraindication-or-allergy.csv",
+    system="snomed",
+    column="code",
+)
+# COVID vaccination contraindication codes (combined)
+covcontra = combine_codelists(
+    covcontra_primis,
+    covcontra_all
 )
 
 # First COVID vaccination declined
@@ -290,3 +318,48 @@ cov2decl = codelist_from_csv(
     column="code",
 )
 
+# First COVID vaccination DNAd
+cov1dna = codelist_from_csv(
+    "codelists/opensafely-covid-19-vaccination-did-not-attend-first-appointment.csv",
+    system="snomed",
+    column="code",
+)
+
+# Second COVID vaccination DNAd
+cov2dna = codelist_from_csv(
+    "codelists/opensafely-covid-19-vaccination-did-not-attend-second-appointment.csv",
+    system="snomed",
+    column="code",
+)
+
+# First COVID vaccination not given / not done
+cov1notgiven = codelist_from_csv(
+    "codelists/opensafely-covid-19-vaccination-first-dose-not-given.csv",
+    system="snomed",
+    column="code",
+)
+
+# Second COVID vaccination not given / not done
+cov2notgiven = codelist_from_csv(
+    "codelists/opensafely-covid-19-vaccination-second-dose-not-given.csv",
+    system="snomed",
+    column="code",
+)
+
+# COVID vaccination not available
+covunav = codelist_from_csv(
+    "codelists/opensafely-covid-19-vaccination-unavailable.csv",
+    system="snomed",
+    column="code",
+)
+
+
+# All codes for vaccine not given (except Declined)
+cov2not = combine_codelists(
+    cov1dna,
+    cov2dna,
+    cov1notgiven,
+    cov2notgiven,
+    covunav,
+    covcontra,
+)
