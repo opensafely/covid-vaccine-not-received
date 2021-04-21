@@ -8,7 +8,7 @@ from add_groupings import add_groupings
 from groups import at_risk_groups, groups
 
 
-demographic_cols = ["age_band", "sex", "ethnicity", "high_level_ethnicity", "imd_band"]
+demographic_cols = ["age_band", "sex", "ethnicity", "high_level_ethnicity", "imd_band", "practice"]
 
 group_cols = [
     group for group in groups if "covax" not in group and "unstatvacc" not in group
@@ -21,6 +21,8 @@ extra_cols = ["patient_id", "vacc1_dat", "vacc2_dat", "wave"]
 vacc_cols = []
 for prefix in ["decl", "cov1decl_acc", "vacc_anyrecord"]:
     vacc_cols.append(f"{prefix}_dat")
+for prefix in ["vacc", "decline"]:#, "vacc_attempt"]:
+    vacc_cols.append(f"{prefix}_group")
     
 
 extra_vacc_cols = []

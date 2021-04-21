@@ -2,6 +2,17 @@ from comparisons import gt, gte, lt, lte
 
 
 def add_groupings(df):
+    # Patients with a vaccination
+    df["vacc_group"] = df["vacc1_dat"].notnull()
+
+    # Patients with a decline (but no vaccination)
+    df["decline_group"] = (df["vacc1_dat"].isnull()) & (df["decl_dat"].notnull())
+
+    # Patients with any other record related to vaccination
+    ## indicates an attempt or intention to vaccinate but 
+    ## likely unsuccessful for reasons other than declining
+    # df["vacc_attempt_group"] = (df["vaccl_dat"].isnull()) & (df["decl_dat"].isnull()) & (df["other_dat"].notnull())
+
     # Patients with Immunosuppression
     #
     # IF IMMRX_DAT <> NULL     | Select | Next
