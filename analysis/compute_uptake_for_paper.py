@@ -24,8 +24,9 @@ def run(input_path="output/cohort.pickle", output_dir="output"):
 
     for event_col, key in [
         ("vacc1_dat", "dose_1"),
+        ("vacc_anyrecord_dat", "any_vaccine_record"),
         ("decl_dat", "declined"),
-	    ("cov1decl_acc_dat", "decl_acc"),
+	    ("cov1decl_acc_dat", "declined_accepted"),
     ]:
         # Compute uptake by wave
         dir_path = f"{base_path}/all/{key}"
