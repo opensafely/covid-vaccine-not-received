@@ -3,15 +3,15 @@ from comparisons import gt, gte, lt, lte
 
 def add_groupings(df):
     # Patients with a vaccination
-    df["vacc_group"] = df["vacc1_dat"].notnull()
+    df["vacc_group"] = df["vacc1_dat"].notnull() | df["vacc2_dat"].notnull()
 
     # Patients with a decline (but no vaccination)
-    df["decline_group"] = (df["vacc1_dat"].isnull()) & (df["decl_dat"].notnull())
+    df["decline_group"] = df["decl_dat"].notnull() & df["vacc1_dat"].isnull() & df["vacc2_dat"].isnull()
 
-    # Patients with any other record related to vaccination
+    # Patients with any other record related to vaccination (and no vaccination or decline)
     ## indicates an attempt or intention to vaccinate but 
-    ## likely unsuccessful for reasons other than declining
-    # df["vacc_attempt_group"] = (df["vaccl_dat"].isnull()) & (df["decl_dat"].isnull()) & (df["other_dat"].notnull())
+    ## (apparently) unsuccessful for reasons other than declining
+    df["vacc_not_successful_group"] = df["cov2not_dat"].notnull() & df["vacc1_dat"].isnull() & df["decl_dat"].isnull()
 
     # Patients with Immunosuppression
     #
