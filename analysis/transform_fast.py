@@ -205,12 +205,12 @@ def add_waves(cohort):
     # (This spec includes frontline H&SC workers, but see above.)
     s.mask((s == 0) & (cohort["age"] >= 80), 2, inplace=True)
 
-    # Wave 3: Age 75 - 79
-    s.mask((s == 0) & (cohort["age"] >= 75), 3, inplace=True)
+    # Wave 3: Age 70 - 79 ## modified from original group for this study
+    s.mask((s == 0) & (cohort["age"] >= 70), 3, inplace=True)
 
-    # Wave 4: Clinically Extremely Vulnerable or age 70 - 74
+    # Wave 4: Clinically Extremely Vulnerable ## modified from original group for this study
     s.mask(
-        (s == 0) & (cohort["shield_group"] | (cohort["age"] >= 70)), 4, inplace=True
+        (s == 0) & (cohort["shield_group"]), 4, inplace=True
     )
 
     # Wave 5: Age 65 - 69
