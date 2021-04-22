@@ -4,6 +4,29 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import PercentFormatter
 
+group_names = {
+    "vacc_group":"Vaccinated", 
+    "decline_group":"Declined", 
+    "vacc_not_successful_group":"Reached",
+    "patient_id":"total"
+    }
+
+def compute_uptake_percent(uptake):#, labels):
+    uptake_pc = 100 * uptake / uptake.loc["total"]
+    uptake_pc.drop("total", inplace=True)
+    uptake_pc.fillna(0, inplace=True)
+    if set(uptake_pc.columns) == {"True", "False"}:
+        # This ensures that chart series are always same colour.
+        uptake_pc = uptake_pc[["True", "False"]]
+    else:
+        # Sort DataFrame columns so that legend is in the same order as chart series.
+        uptake_pc.sort_values(
+            uptake_pc.last_valid_index(), axis=1, ascending=False, inplace=True
+        )
+    #uptake_pc.rename(columns=labels, inplace=True)
+    return uptake_pc
+
+
 def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
     ''' Calculates total patients per practice and of whom how many have had a vaccine to date, or declined
     Note: those declining only include those who have not later received a vaccine.
@@ -45,6 +68,39 @@ def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
     axs[0].set_ylabel("Percent of practices")
 
     return (backend, fig)
+
+
+def current_variation(input_path="output/cohort.pickle", output_dir="output"):
+    ''' Groups patients into Vaccinated, Declined, Reached, Unvaccinated.
+    '''
+    backend = os.getenv("OPENSAFELY_BACKEND", "expectations")
+    base_path = f"{output_dir}/{backend}/coverage_to_date"
+    cohort = pd.read_pickle(input_path)
+
+    current_figures = cohort[["wave", "vacc_group", "decline_group", "vacc_not_successful_group", "patient_id"]]\
+                        .groupby("wave").agg({"vacc_group":"sum", 
+                                              "decline_group":"sum", 
+                                              "vacc_not_successful_group":"sum",
+                                              "patient_id":"nunique"})
+    current_figures = current_figures.rename(columns=group_names)
+
+    current_figures = current_figures.assign(
+        Unvaccinated = current_figures["total"] - current_figures["Vaccinated"]
+                                              - current_figures["Declined"]
+                                              - current_figures["Reached"]
+        )
+    
+
+    return current_figures
+
+
+out = current_variation().transpose()
+out = compute_uptake_percent(out).transpose().sort_index()
+
+out.plot(kind='bar',stacked=True,)
+#plt.legend(bbox_to_anchor=(1.05, 1),)
+plt.show()
+
 
 
 def invert_df(df, group="all"):
