@@ -46,9 +46,18 @@ def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
 
     return (backend, fig)
 
-backend, fig = practice_variation()
-  
-fig.savefig(f"output/{backend}/declines_by_practice_hist.png")
 
+def invert_df(df, group="all"):
+    ''' Inverts df
+    '''
 
+    for i in df.index.drop("total"):
+        df.loc[i] = df.loc["total"] - df.loc[i]
+    
+    #out_path = "output/{backend}/cumulative_coverage/{group}/unreached/{group}_unreached_by_group.csv"
+    #os.makedirs(out_path, exist_ok=True)
 
+    return df
+
+#out = invert()
+#print(out)
