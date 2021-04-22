@@ -32,6 +32,7 @@ def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
     Note: those declining only include those who have not later received a vaccine.
     '''
     backend = os.getenv("OPENSAFELY_BACKEND", "expectations")
+
     base_path = f"{output_dir}/{backend}/coverage_to_date"
     cohort = pd.read_pickle(input_path)
 
@@ -54,20 +55,37 @@ def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
 
     out = practice_figures
 
-    fig, axs = plt.subplots(1, 2, sharey=True, tight_layout=True)
+    for plot_type in ["hist","scatter"]:
+        if plot_type=="hist":
+            fig, axs = plt.subplots(1, 2, sharey=True, tight_layout=True)
 
-    for n, x in enumerate(["decline_per_1000", "decline_per_1000_vacc"]):
-        # set weights to show percent rather than count of practices
-        weights=np.ones(len(out)) / len(out)
-        axs[n].hist(out[x], bins=15, weights=weights)
-        title = "COVID Vaccines "+ x.replace("_"," ").replace("decline", "declined\n").replace("vacc","vaccinated").title()+" Patients"
-        axs[n].set_title(title)
-        axs[n].set_xlabel("Rate per 1000")
-        axs[n].yaxis.set_major_formatter(PercentFormatter(1))
+            for n, x in enumerate(["decline_per_1000", "decline_per_1000_vacc"]):
+                # set weights to show percent rather than count of practices
+                weights=np.ones(len(out)) / len(out)
+                axs[n].hist(out[x], bins=15, weights=weights)
+                axs[n].set_xlabel("Rate per 1000")
+                axs[n].yaxis.set_major_formatter(PercentFormatter(1))
+                axs[0].set_ylabel("Percent of practices")
 
-    axs[0].set_ylabel("Percent of practices")
+            title = "COVID Vaccines "+ x.replace("_"," ").replace("decline", "declined\n").replace("vacc","vaccinated").title()+" Patients"
+            axs[n].set_title(title)
 
-    return (backend, fig)
+        if plot_type=="scatter":
+            fig, axs = plt.subplots(2, 1, sharex=True, tight_layout=True)
+            for n, x in enumerate(["decline_group", "decline_per_1000_vacc"]):
+                axs[n].scatter(out["patient_count"], out[x])
+                if "per_1000_vacc" in x:
+                    title = "COVID Vaccines Declined\n per 1000 vaccinated patients per practice"
+                    ylabel = "Rate per 1000"
+                else:
+                    title = "COVID Vaccines Declined\n per practice"
+                    ylabel = "Patients vaccinated"
+                axs[n].set_ylabel(ylabel)
+                axs[n].set_title(title)
+            axs[1].set_xlabel("Practice population")
+            
+
+        fig.savefig(f"output/{backend}/declines_by_practice_{plot_type}.png")
 
 
 def current_variation(input_path="output/cohort.pickle", output_dir="output"):
@@ -94,12 +112,12 @@ def current_variation(input_path="output/cohort.pickle", output_dir="output"):
     return current_figures
 
 
-out = current_variation().transpose()
-out = compute_uptake_percent(out).transpose().sort_index()
+# out = current_variation().transpose()
+# out = compute_uptake_percent(out).transpose().sort_index()
 
-out.plot(kind='bar',stacked=True,)
-#plt.legend(bbox_to_anchor=(1.05, 1),)
-plt.show()
+# out.plot(kind='bar',stacked=True,)
+# #plt.legend(bbox_to_anchor=(1.05, 1),)
+# plt.show()
 
 
 
@@ -109,11 +127,6 @@ def invert_df(df, group="all"):
 
     for i in df.index.drop("total"):
         df.loc[i] = df.loc["total"] - df.loc[i]
-    
-    #out_path = "output/{backend}/cumulative_coverage/{group}/unreached/{group}_unreached_by_group.csv"
-    #os.makedirs(out_path, exist_ok=True)
+
 
     return df
-
-#out = invert()
-#print(out)

@@ -10,7 +10,4 @@ run(base_path, start_date, end_date)
 
 
 # create practice charts
-backend, fig = practice_variation()
-  
-fig.savefig(f"output/{backend}/declines_by_practice_hist.png")
-
+practice_variation()
