@@ -7,7 +7,7 @@ from matplotlib.ticker import PercentFormatter
 group_names = {
     "vacc_group":"Vaccinated", 
     "decline_group":"Declined", 
-    "vacc_not_successful_group":"Reached",
+    "other_reason_group":"Other reason",
     "patient_id":"total"
     }
 
@@ -67,47 +67,55 @@ def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
                 axs[n].yaxis.set_major_formatter(PercentFormatter(1))
                 axs[0].set_ylabel("Percent of practices")
 
-            title = "COVID Vaccines "+ x.replace("_"," ").replace("decline", "declined\n").replace("vacc","vaccinated").title()+" Patients"
-            axs[n].set_title(title)
+                title = "COVID Vaccines "+ x.replace("_"," ").replace("decline", "declined\n").replace("vacc","vaccinated").title()+" Patients"
+                axs[n].set_title(title)
 
         if plot_type=="scatter":
-            fig, axs = plt.subplots(2, 1, sharex=True, tight_layout=True)
+            fig, axs = plt.subplots(2, 1, sharex=True, tight_layout=True, figsize=(6,8))
             for n, x in enumerate(["decline_group", "decline_per_1000_vacc"]):
-                axs[n].scatter(out["patient_count"], out[x])
+                axs[n].scatter(out["patient_count"]/1000, out[x])
                 if "per_1000_vacc" in x:
                     title = "COVID Vaccines Declined\n per 1000 vaccinated patients per practice"
                     ylabel = "Rate per 1000"
                 else:
                     title = "COVID Vaccines Declined\n per practice"
-                    ylabel = "Patients vaccinated"
+                    ylabel = "Vaccines Declined"
                 axs[n].set_ylabel(ylabel)
                 axs[n].set_title(title)
-            axs[1].set_xlabel("Practice population")
+            axs[1].set_xlabel("Practice population (thousands)")
             
 
-        fig.savefig(f"output/{backend}/declines_by_practice_{plot_type}.png")
+        fig.savefig(f"output/{backend}/charts/declines_by_practice_{plot_type}.png")
 
 
 def current_variation(input_path="output/cohort.pickle", output_dir="output"):
-    ''' Groups patients into Vaccinated, Declined, Reached, Unvaccinated.
+    ''' Groups patients into Vaccinated, Declined, Other reason, Unvaccinated.
     '''
     backend = os.getenv("OPENSAFELY_BACKEND", "expectations")
     base_path = f"{output_dir}/{backend}/coverage_to_date"
     cohort = pd.read_pickle(input_path)
 
-    current_figures = cohort[["wave", "vacc_group", "decline_group", "vacc_not_successful_group", "patient_id"]]\
+    current_figures = cohort[["wave", "vacc_group", "decline_group", "other_reason_group", "patient_id"]]\
                         .groupby("wave").agg({"vacc_group":"sum", 
                                               "decline_group":"sum", 
-                                              "vacc_not_successful_group":"sum",
+                                              "other_reason_group":"sum",
                                               "patient_id":"nunique"})
     current_figures = current_figures.rename(columns=group_names)
 
     current_figures = current_figures.assign(
         Unvaccinated = current_figures["total"] - current_figures["Vaccinated"]
                                               - current_figures["Declined"]
-                                              - current_figures["Reached"]
+                                              - current_figures["Other reason"]
         )
     
+    current_figures = current_figures.transpose()
+    out = compute_uptake_percent(current_figures).transpose().sort_index()
+    
+    fig, ax = plt.subplots()
+    out.plot(kind='bar', stacked=True, ax=ax)
+    ax.set_ylabel("Percent")
+    plt.legend(loc="lower right")
+    fig.savefig(f"output/{backend}/charts/declines_by_wave.png")
 
     return current_figures
 
@@ -118,7 +126,6 @@ def current_variation(input_path="output/cohort.pickle", output_dir="output"):
 # out.plot(kind='bar',stacked=True,)
 # #plt.legend(bbox_to_anchor=(1.05, 1),)
 # plt.show()
-
 
 
 def invert_df(df, group="all"):

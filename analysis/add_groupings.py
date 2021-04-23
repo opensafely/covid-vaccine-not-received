@@ -14,7 +14,7 @@ def add_groupings(df):
     # Patients with any other record related to vaccination (and no vaccination or decline)
     ## indicates an attempt or intention to vaccinate but 
     ## (apparently) unsuccessful for reasons other than declining
-    df["unreached_group"] = df["cov2not_dat"].notnull() & df["vacc1_dat"].isnull() & df["decl_dat"].isnull()
+    df["other_reason_group"] = df["cov2not_dat"].notnull() & df["vacc1_dat"].isnull() & df["decl_dat"].isnull()
 
     # Patients with Immunosuppression
     #

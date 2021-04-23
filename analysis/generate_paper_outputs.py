@@ -9,7 +9,7 @@ from matplotlib.ticker import FixedFormatter, PercentFormatter
 from matplotlib.dates import TU, WeekdayLocator
 import pandas as pd
 
-from compute_uptake_for_paper import at_risk_cols, cols, demographic_cols, other_cols
+from compute_uptake_for_paper import cols, demographic_cols, other_cols
 from ethnicities import ethnicities, high_level_ethnicities
 from groups import groups, at_risk_groups
 
@@ -35,22 +35,19 @@ wave_column_headings = {
 title_starts = {
         "dose_1": "Vaccination Coverage",
         "unreached": "People Not Reached",
-        "declined": "Vaccines declined",
-	    "declined_accepted": "Vaccines Declined but later Accepted"
+        "declined": "Vaccines declined"
     }
 
 title_ends = {
         "dose_1": "who \n have received their first COVID vaccine",
         "unreached": "with\n no COVID vaccine-related records",
-        "declined": "who\n have declined a COVID vaccine",
-	    "declined_accepted": "who\n declined but later accepted a COVID vaccine"
+        "declined": "who\n have declined a COVID vaccine"
     }
 
 subtitles = {
         "dose_1": "First dose",
         "unreached": "No Vaccine-Related Record",
         "declined": "Declined",
-	    "declined_accepted": "Declined but later accepted"
     }
 
 
@@ -73,11 +70,21 @@ def run(base_path, earliest_date, latest_date):
     os.makedirs(tables_path, exist_ok=True)
     os.makedirs(charts_path, exist_ok=True)
     os.makedirs(reports_path, exist_ok=True)
+    
+    for wave in range(1, 9 +1):
+        generate_stacked_charts_for_all(
+                    base_path,
+                    charts_path,
+                    wave,
+                    earliest_date,
+                    latest_date,
+                    demographic_titles,
+                    label_maps
+                )
 
     for key in ["dose_1", 
                 "unreached",
-                "declined",
-                "declined_accepted"]:
+                "declined"]:
         in_path = f"{base_path}/cumulative_coverage/all/{key}/all_{key}_by_group.csv"
         title_start = title_starts[key]
         title_end = title_ends[key]
@@ -95,7 +102,10 @@ def run(base_path, earliest_date, latest_date):
             latest_date,
             subtitles
         )
-
+        
+        ######
+        return
+        ######
         for wave in range(1, 9 + 1):
             in_path = f"{base_path}/cumulative_coverage/group_{wave}/{key}"
 
@@ -175,8 +185,12 @@ def generate_summary_table_for_all(
 
 def generate_charts_for_all(in_path, charts_path, key, earliest_date, latest_date, title_end):
     uptake = load_uptake(in_path, earliest_date, latest_date)
-
-    uptake_total = uptake.iloc[:-1] / 1_000_000
+    if uptake.iloc[-2].max()>1_000_000:
+        uptake_total = uptake.iloc[:-1] / 1_000_000
+        units="millions"
+    else: 
+        uptake_total = uptake.iloc[:-1] / 1_000
+        units="thousands"
     uptake_total["total"] = uptake_total.loc[:, "0":"9"].sum(axis=1)
     uptake_total["all_priority"] = uptake_total.loc[:, "1":"9"].sum(axis=1)
     uptake_total = uptake_total.loc[:, ["total", "all_priority", "0"]]
@@ -186,7 +200,7 @@ def generate_charts_for_all(in_path, charts_path, key, earliest_date, latest_dat
     uptake_total.rename(columns=wave_column_headings, inplace=True)
     plot_chart(
         uptake_total,
-        f"Total number of patients {title_end} (million)",
+        f"Total number of patients {title_end} ({units})",
         f"{charts_path}/all_{key}_total.png",
         is_percent=False,
     )
@@ -263,10 +277,10 @@ def generate_summary_table_for_wave(
 
         if col in demographic_cols:
             summaries[demographic_title] = compute_summary(uptake, labels)
-        elif col in at_risk_cols:
-            summary = compute_summary(uptake)
-            if "True" in summary.index:
-                at_risk_summary[demographic_titles[col]] = summary.loc["True"]
+        # elif col in at_risk_cols:
+        #     summary = compute_summary(uptake)
+        #     if "True" in summary.index:
+        #         at_risk_summary[demographic_titles[col]] = summary.loc["True"]
         elif col in other_cols:
             summary = compute_summary(uptake)
             if "True" in summary.index:
@@ -274,9 +288,9 @@ def generate_summary_table_for_wave(
         else:
             assert False, col
 
-    summaries["Clinical Risk Groups"] = pd.DataFrame.from_dict(
-        at_risk_summary, orient="index"
-    )
+    # summaries["Clinical Risk Groups"] = pd.DataFrame.from_dict(
+    #     at_risk_summary, orient="index"
+    # )
     summaries["Other Groups"] = pd.DataFrame.from_dict(other_summary, orient="index")
     summaries = {k: v for k, v in summaries.items() if not v.empty}
 
@@ -320,7 +334,7 @@ def generate_charts_for_wave(
     in_path, out_path, wave, key, earliest_date, latest_date, demographic_titles, label_maps, title_start
 ):
     for col in cols:
-        demographic_title = f"{title_start} in Priority Group {wave}\nby {demographic_titles[col]}"
+        title = f"{title_start} in Priority Group {wave}\nby {demographic_titles[col]}"
         labels = label_maps[col]
         uptake = load_uptake(
             f"{in_path}/group_{wave}_{key}_by_{col}.csv", earliest_date, latest_date
@@ -331,19 +345,54 @@ def generate_charts_for_wave(
         cohort_average = 100 * uptake.sum(axis=1).iloc[-2] / uptake.sum(axis=1).iloc[-1]
         uptake_pc = compute_uptake_percent(uptake, labels)
         plot_chart(
-            uptake_pc, demographic_title, f"{out_path}/group_{wave}_{key}_{col}.png", cohort_average,
+            uptake_pc, title, f"{out_path}/group_{wave}_{key}_{col}.png", cohort_average,
         )
 
         if col == "ethnicity":
             plot_chart(
                 uptake_pc,
-                demographic_title,
+                title,
                 f"{out_path}/group_{wave}_{key}_{col}_highlighting_bangladeshi_ethnicity.png",
                 cohort_average,
                 highlight_bangladeshi_ethnicity=True,
             )
 
 
+def generate_stacked_charts_for_all(
+    base_path, out_path, wave, earliest_date, latest_date, demographic_titles, label_maps
+):
+    for col in cols: # e.g. ethnicity
+        group_name = wave_column_headings[str(wave)]
+        title = f"Vaccination and Decline rates among those in '{group_name}' group\n by {demographic_titles[col]}"
+        labels = label_maps[col]
+        uptake_by_dem = pd.Series()
+
+        for key in subtitles: # e.g. declined
+            in_path = f"{base_path}/cumulative_coverage/group_{wave}/{key}"
+            uptake = load_uptake(
+                f"{in_path}/group_{wave}_{key}_by_{col}.csv", earliest_date, latest_date
+            )
+            if uptake is None:
+                return
+            
+            uptake = uptake.rename(index={uptake.index[-2]:key})
+            if key=="dose_1":
+                uptake = uptake.tail(2)
+            else:
+                uptake = uptake.iloc[-2]
+            
+            # combine keys (e.g. vaccinated, declined etc)
+            uptake_by_dem = uptake_by_dem.append(uptake)
+
+        uptake_pc = compute_uptake_percent(uptake_by_dem, labels)
+        uptake_pc = uptake_pc.rename(columns=subtitles)
+        uptake_pc = uptake_pc.transpose().drop(0)
+
+        plot_stacked_chart(
+            uptake_pc, title, f"{out_path}/wave_{wave}_{key}_{col}.png"
+        )
+
+            
 def compute_uptake_percent(uptake, labels):
     uptake_pc = 100 * uptake / uptake.loc["total"]
     uptake_pc.drop("total", inplace=True)
@@ -497,6 +546,18 @@ def plot_chart(
     plt.close()
 
 
+def plot_stacked_chart(df, title, out_path):
+    ax = plt.gca()
+    df.plot(kind='bar', stacked=True, ax=ax)
+
+    ax.set_ylabel("Percent")
+    ax.set_title(title)
+    ax.set_ylim(ymax=100)
+    ax.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0)
+
+    plt.savefig(out_path, dpi=300, bbox_inches="tight")
+    plt.close()
+
 def load_uptake(path, earliest_date, latest_date):
     try:
         uptake = pd.read_csv(path, index_col=0)
@@ -509,7 +570,7 @@ def load_uptake(path, earliest_date, latest_date):
     ]
 
 
-if __name__ == "__main__":
-    import sys
+#if __name__ == "__main__":
+#    import sys
 
-    run(*sys.argv[1:])
+#    run(*sys.argv[1:])

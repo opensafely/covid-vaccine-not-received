@@ -49,9 +49,6 @@ def run(input_path="output/cohort.pickle", output_dir="output"):
             wave_cohort = cohort[cohort["wave"] == wave]
 
             for col in cols:
-                if (wave in [1,2,3,5,7,8]) & (col=="preg_group"):
-                    # do not split by pregnancy status for older age groups
-                    continue
                 dir_path = f"{base_path}/group_{wave}/{key}"
                 os.makedirs(dir_path, exist_ok=True)
                 uptake = compute_uptake(wave_cohort, event_col, col)
