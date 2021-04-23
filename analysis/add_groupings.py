@@ -8,10 +8,13 @@ def add_groupings(df):
     # Patients with a decline (but no vaccination)
     df["decline_group"] = df["decl_dat"].notnull() & df["vacc1_dat"].isnull() & df["vacc2_dat"].isnull()
 
+    # Patients with a decline and a later vaccination
+    df["declined_accepted_group"] = gt(df["vacc1_dat"], df["decl_dat"])
+
     # Patients with any other record related to vaccination (and no vaccination or decline)
     ## indicates an attempt or intention to vaccinate but 
     ## (apparently) unsuccessful for reasons other than declining
-    df["vacc_not_successful_group"] = df["cov2not_dat"].notnull() & df["vacc1_dat"].isnull() & df["decl_dat"].isnull()
+    df["unreached_group"] = df["cov2not_dat"].notnull() & df["vacc1_dat"].isnull() & df["decl_dat"].isnull()
 
     # Patients with Immunosuppression
     #

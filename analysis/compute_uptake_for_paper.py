@@ -11,10 +11,10 @@ demographic_cols = [
     "high_level_ethnicity",
     "imd_band",
 ]
-at_risk_cols = ["atrisk_group"] #+ list(at_risk_groups)
-other_cols = ["shield_group", "preg_group"]
+#at_risk_cols = ["atrisk_group"] #+ list(at_risk_groups)
+other_cols = ["preg_group"]
 
-cols = demographic_cols + at_risk_cols + other_cols
+cols = demographic_cols  + other_cols #+ at_risk_cols
 
 
 def run(input_path="output/cohort.pickle", output_dir="output"):
@@ -24,10 +24,10 @@ def run(input_path="output/cohort.pickle", output_dir="output"):
 
     for event_col, key in [
         ("vacc1_dat", "dose_1"),
-        ("vacc_anyrecord_dat", "any_vaccine_record"),
+        ("vacc_any_record_dat", "any_vaccine_record"),
         ("decl_dat", "declined"),
         #("cov2not_dat", "vaccine_not_done"),
-	    ("cov1decl_acc_dat", "declined_accepted"),
+	    #("cov1decl_acc_dat", "declined_accepted"),
     ]:
 
         # Compute uptake by wave
@@ -37,7 +37,7 @@ def run(input_path="output/cohort.pickle", output_dir="output"):
         uptake.to_csv(f"{dir_path}/all_{key}_by_group.csv")
 
         # for "any vaccine record" calculate the inverse ie. no of patients with NO vaccine related record
-        if event_col == "vacc_anyrecord_dat":
+        if event_col == "vacc_any_record_dat":
             uptake2 = invert_df(uptake)
             out_path = f"{base_path}/all/unreached"
             os.makedirs(out_path, exist_ok=True)
@@ -49,6 +49,9 @@ def run(input_path="output/cohort.pickle", output_dir="output"):
             wave_cohort = cohort[cohort["wave"] == wave]
 
             for col in cols:
+                if (wave in [1,2,3,5,7,8]) & (col=="preg_group"):
+                    # do not split by pregnancy status for older age groups
+                    continue
                 dir_path = f"{base_path}/group_{wave}/{key}"
                 os.makedirs(dir_path, exist_ok=True)
                 uptake = compute_uptake(wave_cohort, event_col, col)
@@ -56,7 +59,7 @@ def run(input_path="output/cohort.pickle", output_dir="output"):
                     continue
                 uptake.to_csv(f"{dir_path}/group_{wave}_{key}_by_{col}.csv")
             
-                if event_col == "vacc_anyrecord_dat":
+                if event_col == "vacc_any_record_dat":
                     uptake2 = invert_df(uptake)
                     out_path = f"{base_path}/group_{wave}/unreached"
                     os.makedirs(out_path, exist_ok=True)
