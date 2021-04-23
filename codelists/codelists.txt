@@ -41,7 +41,8 @@ primis-covid19-vacc-uptake/cov1decl/v1.1
 primis-covid19-vacc-uptake/cov2decl/v1.1
 opensafely/covid-19-vaccination-did-not-attend-first-appointment/300d360f
 opensafely/covid-19-vaccination-did-not-attend-second-appointment/53e7a91c
-opensafely/covid-19-vaccination-first-dose-not-given/6fa9dc47
-opensafely/covid-19-vaccination-second-dose-not-given/569a6912
+opensafely/covid-19-vaccination-first-dose-not-given/0c7e9651
+opensafely/covid-19-vaccination-second-dose-not-given/736f231b
 opensafely/covid-19-vaccination-unavailable/21c8c2b2
-opensafely/covid-19-vaccination-contraindication-or-allergy/3ad835e7
+opensafely/covid-19-vaccination-contraindication-or-allergy/2840c97c
+opensafely/covid-19-vaccination-given/0f315647

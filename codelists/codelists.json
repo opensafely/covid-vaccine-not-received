@@ -259,16 +259,16 @@
       "sha": "b05859e04ccfcedd04a80f281f801573e026dc53"
     },
     "opensafely-covid-19-vaccination-first-dose-not-given.csv": {
-      "id": "opensafely/covid-19-vaccination-first-dose-not-given/6fa9dc47",
-      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-19-vaccination-first-dose-not-given/6fa9dc47/",
-      "downloaded_at": "2021-04-21 11:34:55.808313Z",
-      "sha": "f56b16ced7a45461665f9c2400fc6a5b0fb378de"
+      "id": "opensafely/covid-19-vaccination-first-dose-not-given/0c7e9651",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-19-vaccination-first-dose-not-given/0c7e9651/",
+      "downloaded_at": "2021-04-23 11:07:27.165614Z",
+      "sha": "fdc3b07699347907f2662e158bcb022f2fcd8cb5"
     },
     "opensafely-covid-19-vaccination-second-dose-not-given.csv": {
-      "id": "opensafely/covid-19-vaccination-second-dose-not-given/569a6912",
-      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-19-vaccination-second-dose-not-given/569a6912/",
-      "downloaded_at": "2021-04-21 11:34:55.900005Z",
-      "sha": "44b8a77604de3348dc4397d83ab765daf7338d0b"
+      "id": "opensafely/covid-19-vaccination-second-dose-not-given/736f231b",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-19-vaccination-second-dose-not-given/736f231b/",
+      "downloaded_at": "2021-04-23 11:07:27.320172Z",
+      "sha": "9fd64c8c661fd6b83992c4e8f9947162aae489d7"
     },
     "opensafely-covid-19-vaccination-unavailable.csv": {
       "id": "opensafely/covid-19-vaccination-unavailable/21c8c2b2",
@@ -277,10 +277,16 @@
       "sha": "31bd232bfc7745402487a7df70019f9c02b4509c"
     },
     "opensafely-covid-19-vaccination-contraindication-or-allergy.csv": {
-      "id": "opensafely/covid-19-vaccination-contraindication-or-allergy/3ad835e7",
-      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-19-vaccination-contraindication-or-allergy/3ad835e7/",
-      "downloaded_at": "2021-04-21 11:34:56.120532Z",
-      "sha": "85ef67d1c1688f0ae3f3621d4a23d2ea739eba7c"
+      "id": "opensafely/covid-19-vaccination-contraindication-or-allergy/2840c97c",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-19-vaccination-contraindication-or-allergy/2840c97c/",
+      "downloaded_at": "2021-04-23 11:07:27.550155Z",
+      "sha": "9cc5fcff92c4fdb2b91f84fccec8f0b0835ed7af"
+    },
+    "opensafely-covid-19-vaccination-given.csv": {
+      "id": "opensafely/covid-19-vaccination-given/0f315647",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-19-vaccination-given/0f315647/",
+      "downloaded_at": "2021-04-23 11:07:27.655542Z",
+      "sha": "a88c9e7c4ea16659f4ea27edd177e9a3352cb0d5"
     }
   }
 }
