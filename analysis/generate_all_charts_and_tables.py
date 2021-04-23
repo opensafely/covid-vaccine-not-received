@@ -1,5 +1,5 @@
 from generate_paper_outputs import run
-from custom_operations import practice_variation, current_variation
+from custom_operations import practice_variation, current_variation, declined_vaccinated
 
 base_path = f"output/expectations"
 start_date = "2020-12-01"
@@ -14,3 +14,6 @@ practice_variation()
 
 # create summary chart of patient vaccine statuses by priority group
 current_variation()
+
+# create summary chart of patients declining then accepting vaccines, by priority group
+declined_vaccinated()

@@ -1,3 +1,6 @@
+''' This module generates charts from cohort.pickle rather than from the cumulative csvs.
+''' 
+
 import os
 import pandas as pd
 import numpy as np
@@ -8,6 +11,7 @@ group_names = {
     "vacc_group":"Vaccinated", 
     "decline_group":"Declined", 
     "other_reason_group":"Other reason",
+    "declined_accepted_group": "Declined then accepted",
     "patient_id":"total"
     }
 
@@ -88,8 +92,10 @@ def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
         fig.savefig(f"output/{backend}/charts/declines_by_practice_{plot_type}.png")
 
 
+# the following function could be carried out within generate_paper_outputs.py
 def current_variation(input_path="output/cohort.pickle", output_dir="output"):
     ''' Groups patients into Vaccinated, Declined, Other reason, Unvaccinated.
+        Presents the total number in each group for each wave/cohort.
     '''
     backend = os.getenv("OPENSAFELY_BACKEND", "expectations")
     base_path = f"{output_dir}/{backend}/coverage_to_date"
@@ -127,13 +133,49 @@ def current_variation(input_path="output/cohort.pickle", output_dir="output"):
 # #plt.legend(bbox_to_anchor=(1.05, 1),)
 # plt.show()
 
+def declined_vaccinated(input_path="output/cohort.pickle", output_dir="output"):
+    ''' Counts patients who went from "Declined" to "Vaccinated".
+        Creates a chart. 
+    '''
+    backend = os.getenv("OPENSAFELY_BACKEND", "expectations")
+    base_path = f"{output_dir}/{backend}/coverage_to_date"
+    cohort = pd.read_pickle(input_path)
+
+    cohort = cohort[["wave", "vacc_group", "declined_accepted_group", "patient_id"]]\
+                        .groupby("wave").agg({"vacc_group":"sum", 
+                                              "declined_accepted_group":"sum", 
+                                              "patient_id":"nunique"})
+    cohort = cohort.rename(columns=group_names)
+
+    cohort = cohort.assign(
+        per_1000 = 1000*cohort["Declined then accepted"]/cohort["total"],
+        per_1000_vacc = 1000*cohort["Declined then accepted"]/cohort["Vaccinated"]
+    )
+    
+    fig, axs = plt.subplots(2, 1, sharex=True, tight_layout=True, figsize=(6,8))
+    for n, x in enumerate(["per_1000", "per_1000_vacc"]):
+        cohort[x].plot(kind='bar', stacked=True, ax=axs[n])
+        if x=="per_1000_vacc":
+            title = "Patients Declining and later Accepting COVID Vaccines\n per 1000 vaccinated patients"  
+        else:
+            title = "Patients Declining and later Accepting COVID Vaccines\n per 1000 patients"
+        
+        axs[n].set_ylabel("Rate per 1000")
+        axs[n].set_title(title)
+
+    axs[1].set_xlabel("Cohort")
+
+    fig.savefig(f"output/{backend}/charts/all_declined_then_accepted_by_wave.png")
+
+
 
 def invert_df(df, group="all"):
-    ''' Inverts df
+    ''' "Inverts" df: 
+    calculates the difference between the total population ("total" row) and 
+    each other row in turn, so if df counts "patients vaccinated", the resulting
+    df counts "patients NOT vaccinated".
     '''
-
     for i in df.index.drop("total"):
         df.loc[i] = df.loc["total"] - df.loc[i]
-
 
     return df
