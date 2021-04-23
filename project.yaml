@@ -11,6 +11,13 @@ actions:
       highly_sensitive:
         cohort: output/input.csv
 
+  cohort_checks:
+    run: python:latest python analysis/cohort_checks.py
+    needs: [generate_study_population]
+    outputs:
+      moderately_sensitive:
+        cohort: output/cohort_checks.csv
+
   transform:
     run: python:latest python analysis/transform.py output/input.csv
     needs: [generate_study_population]
