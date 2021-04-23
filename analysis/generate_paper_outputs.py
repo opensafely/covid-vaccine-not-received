@@ -72,7 +72,7 @@ def run(base_path, earliest_date, latest_date):
     os.makedirs(reports_path, exist_ok=True)
     
     for wave in range(1, 9 +1):
-        generate_stacked_charts_for_all(
+        generate_stacked_charts_for_wave(
                     base_path,
                     charts_path,
                     wave,
@@ -103,9 +103,6 @@ def run(base_path, earliest_date, latest_date):
             subtitles
         )
         
-        ######
-        return
-        ######
         for wave in range(1, 9 + 1):
             in_path = f"{base_path}/cumulative_coverage/group_{wave}/{key}"
 
@@ -358,7 +355,7 @@ def generate_charts_for_wave(
             )
 
 
-def generate_stacked_charts_for_all(
+def generate_stacked_charts_for_wave(
     base_path, out_path, wave, earliest_date, latest_date, demographic_titles, label_maps
 ):
     for col in cols: # e.g. ethnicity
@@ -536,7 +533,11 @@ def plot_chart(
 
     if is_percent:
         ax.yaxis.set_major_formatter(PercentFormatter())
-        ax.set_ylim(ymax=100)
+        if "declined" in out_path:
+            ymax = df.max().max()*1.05
+        else:
+            ymax=100
+        ax.set_ylim(ymax=ymax)
 
     if cohort_average is not None:
         ax.axhline(cohort_average, color="k", linestyle="--", alpha=0.5)
