@@ -56,6 +56,7 @@ def transform(cohort):
 
     drop_non_fm_sex(cohort)
     drop_over_120_age(cohort)
+    drop_under_16_age(cohort)
     add_imd_bands(cohort)
     add_ethnicity(cohort)
     add_high_level_ethnicity(cohort)
@@ -87,6 +88,15 @@ def drop_over_120_age(cohort):
     """
 
     ix = cohort[cohort["age"] >= 120].index
+    cohort.drop(ix, inplace=True)
+
+def drop_under_16_age(cohort):
+    """Drop records where age is >16.
+
+    Keep only over 16s eligible for vaccine.
+    """
+
+    ix = cohort[cohort["age"] < 16].index
     cohort.drop(ix, inplace=True)
 
 
