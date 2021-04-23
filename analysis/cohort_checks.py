@@ -18,6 +18,6 @@ def load_raw_cohort(input_path):
 
 raw_cohort = load_raw_cohort(input_path)
 
-checks = raw_cohort.agg({"max","min"})
+checks = raw_cohort.agg({"max","min"}).transpose()
 
 checks.to_csv(f"{output_path}")
