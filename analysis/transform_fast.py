@@ -6,6 +6,7 @@ import pandas as pd
 from age_bands import add_age_bands
 from add_groupings import add_groupings
 from groups import at_risk_groups, groups
+from datetime import datetime
 
 
 demographic_cols = ["age_band", "sex", "ethnicity", "high_level_ethnicity", "imd_band", "practice"]
@@ -61,6 +62,7 @@ def transform(cohort):
     add_ethnicity(cohort)
     add_high_level_ethnicity(cohort)
     add_missing_vacc_columns(cohort)
+    replace_unknown_dates(cohort)
     add_vacc_dates(cohort)
     add_vacc_decline_dates(cohort)
     add_vacc_any_record_dates(cohort)
@@ -174,12 +176,20 @@ def add_missing_vacc_columns(cohort):
         cohort[col] = np.nan
 
 
+def replace_unknown_dates(cohort):
+    """Where an event date was unknown (1900-01-01) or obviously incorrect (prior to vaccination campaign),
+    replace with "2020-11-28". 
+    """
+    for col in ["cov1decl_dat", "cov2decl_dat", "cov2not_dat"]:
+        cohort.loc[cohort[col]<"2020-11-29", col] = datetime(2020,11,28)
+
+    
 def add_vacc_dates(cohort):
     """Record earliest date of first and second vaccinations.
 
     In some cases, a patient will have only one covadm1/2_dat and covrx1/2_dat.
     """
-
+    
     cohort["vacc1_dat"] = cohort[["covadm1_dat", "covrx1_dat", "cov2snomed_dat"]].min(axis=1)
     cohort["vacc2_dat"] = cohort[["covadm2_dat", "covrx2_dat"]].min(axis=1)
 

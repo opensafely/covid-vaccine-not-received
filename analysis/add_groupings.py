@@ -9,7 +9,12 @@ def add_groupings(df):
     df["decline_group"] = df["decl_dat"].notnull() & df["vacc1_dat"].isnull() & df["vacc2_dat"].isnull()
 
     # Patients with a decline and a later vaccination
-    df["declined_accepted_group"] = gt(df["vacc1_dat"], df["decl_dat"])
+    # check that declined date is within the vaccination campaign period not in the past
+    # (otherwise exclude, as unable determine correct sequence of events)
+    df["declined_accepted_group"] = gt(df["vacc1_dat"], df["decl_dat"]) & (
+                                     df["decl_dat"] >= "2020-12-08") & (
+                                     df["vacc1_dat"] >= "2020-12-08"
+                                     )
 
     # Patients with any other record related to vaccination (and no vaccination or decline)
     ## indicates an attempt or intention to vaccinate but 

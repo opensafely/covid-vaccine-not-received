@@ -506,6 +506,9 @@ study = StudyDefinition(
         find_last_match_in_period=True,
         on_or_before="index_date",
         date_format="YYYY-MM-DD",
+        return_expectations={
+            "date": {"earliest": "2019-01-01", "latest": "today"},
+        }
     ),
     # First COVID vaccination declined
     cov1decl_dat=patients.with_these_clinical_events(
@@ -514,6 +517,9 @@ study = StudyDefinition(
         find_first_match_in_period=True,
         on_or_before="index_date",
         date_format="YYYY-MM-DD",
+        return_expectations={
+            "date": {"earliest": "2019-01-01", "latest": "today"},
+        }
     ),
     # Second COVID vaccination declined
     cov2decl_dat=patients.with_these_clinical_events(
@@ -522,6 +528,9 @@ study = StudyDefinition(
         find_first_match_in_period=True,
         on_or_before="index_date",
         date_format="YYYY-MM-DD",
+        return_expectations={
+            "date": {"earliest": "2019-01-01", "latest": "today"},
+        }
     ),
 
     # COVID vaccination not given (reasons other than decline)
@@ -531,6 +540,9 @@ study = StudyDefinition(
         find_first_match_in_period=True,
         on_or_before="index_date",
         date_format="YYYY-MM-DD",
+        return_expectations={
+            "date": {"earliest": "2019-01-01", "latest": "today"},
+        }
     ),
 
     # COVID vaccination given (SNOMED)
