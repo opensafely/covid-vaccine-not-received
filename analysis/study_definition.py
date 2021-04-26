@@ -519,6 +519,7 @@ study = StudyDefinition(
         date_format="YYYY-MM-DD",
         return_expectations={
             "date": {"earliest": "2019-01-01", "latest": "today"},
+            "rate": "exponential_increase",
         }
     ),
     # Second COVID vaccination declined
@@ -530,6 +531,7 @@ study = StudyDefinition(
         date_format="YYYY-MM-DD",
         return_expectations={
             "date": {"earliest": "2019-01-01", "latest": "today"},
+            "rate": "exponential_increase",
         }
     ),
 
@@ -542,6 +544,7 @@ study = StudyDefinition(
         date_format="YYYY-MM-DD",
         return_expectations={
             "date": {"earliest": "2019-01-01", "latest": "today"},
+            "rate": "exponential_increase",
         }
     ),
 
