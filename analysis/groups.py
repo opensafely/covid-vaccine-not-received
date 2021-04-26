@@ -13,7 +13,7 @@ groups = {
     "unstatvacc1_group": "Patients who have an unstated dose 1 vaccination type",
     "unstatvacc2_group": "Patients who have an unstated dose 2 vaccination type",
     "shield_group": "Patients who are shielding (High Risk from COVID-19)",
-    "preg_group": "Patients who are pregnant",
+    "preg_group": "Patients who are, or were recently, pregnant",
 }
 
 

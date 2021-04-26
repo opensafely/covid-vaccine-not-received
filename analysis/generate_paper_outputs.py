@@ -71,6 +71,11 @@ def run(base_path, earliest_date, latest_date):
     os.makedirs(charts_path, exist_ok=True)
     os.makedirs(reports_path, exist_ok=True)
     
+
+    generate_stacked_charts_for_all(base_path, charts_path,
+                                    earliest_date,latest_date,
+                                    )
+
     for wave in range(1, 9 +1):
         generate_stacked_charts_for_wave(
                     base_path,
@@ -355,6 +360,46 @@ def generate_charts_for_wave(
             )
 
 
+def generate_stacked_charts_for_all(
+    base_path, out_path, earliest_date, latest_date
+):
+    title = f"Vaccination and Decline rates\n for each cohort"
+    labels = wave_column_headings
+    uptake_by_group = pd.Series()
+
+    for key in subtitles: # e.g. declined
+        in_path = f"{base_path}/cumulative_coverage/all/{key}"
+        uptake = load_uptake(
+            f"{in_path}/all_{key}_by_group.csv", earliest_date, latest_date
+        )
+        if uptake is None:
+            return
+
+        uptake = uptake.rename(index={uptake.index[-2]:key})
+        if key=="dose_1":
+            uptake = uptake.tail(2)
+        else:
+            uptake = uptake.iloc[-2]
+        
+        # combine keys (e.g. vaccinated, declined etc)
+        uptake_by_group = uptake_by_group.append(uptake)
+
+    uptake_pc = compute_uptake_percent(uptake_by_group, labels)
+    uptake_pc = uptake_pc[list(wave_column_headings.values())[2:]]
+    uptake_pc = uptake_pc.rename(index=subtitles)
+    uptake_pc = uptake_pc.transpose()
+
+    # calculate the proportion with no vaccine for other reasons
+    uptake_pc["No Vaccine with Reason"] = 100 - uptake_pc.sum(axis=1)
+    # reorder columns
+    uptake_pc = uptake_pc[["First dose","Declined", "No Vaccine with Reason", "No Vaccine-Related Record"]]
+    
+    plot_stacked_chart(
+        uptake_pc, title, f"{out_path}/all_vaccinated_declined_by_group.png"
+    )
+
+
+
 def generate_stacked_charts_for_wave(
     base_path, out_path, wave, earliest_date, latest_date, demographic_titles, label_maps
 ):
@@ -382,8 +427,13 @@ def generate_stacked_charts_for_wave(
             uptake_by_dem = uptake_by_dem.append(uptake)
 
         uptake_pc = compute_uptake_percent(uptake_by_dem, labels)
-        uptake_pc = uptake_pc.rename(columns=subtitles)
+        uptake_pc = uptake_pc.rename(index=subtitles, columns=subtitles)
         uptake_pc = uptake_pc.transpose().drop(0)
+
+        # calculate the proportion with no vaccine for other reasons
+        uptake_pc["No vaccine with reason"] = 100 - uptake_pc.sum(axis=1)
+        # reorder columns
+        uptake_pc = uptake_pc[["First dose","Declined", "No vaccine with reason", "No Vaccine-Related Record"]]
 
         plot_stacked_chart(
             uptake_pc, title, f"{out_path}/wave_{wave}_{key}_{col}.png"
@@ -554,7 +604,8 @@ def plot_stacked_chart(df, title, out_path):
     ax.set_ylabel("Percent")
     ax.set_title(title)
     ax.set_ylim(ymax=100)
-    ax.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0)
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles[::-1], labels[::-1], title="Vaccination status", bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0)
 
     plt.savefig(out_path, dpi=300, bbox_inches="tight")
     plt.close()

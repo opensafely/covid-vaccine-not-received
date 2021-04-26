@@ -105,46 +105,6 @@ def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
         fig.savefig(f"output/{backend}/charts/declines_by_practice_{plot_type}.png")
 
 
-# the following function could be carried out within generate_paper_outputs.py
-def current_variation(input_path="output/cohort.pickle", output_dir="output"):
-    ''' Groups patients into Vaccinated, Declined, Other reason, Unvaccinated.
-        Presents the total number in each group for each wave/cohort.
-    '''
-    backend = os.getenv("OPENSAFELY_BACKEND", "expectations")
-    base_path = f"{output_dir}/{backend}/coverage_to_date"
-    cohort = pd.read_pickle(input_path)
-
-    current_figures = cohort[["wave", "vacc_group", "decline_group", "other_reason_group", "patient_id"]]\
-                        .groupby("wave").agg({"vacc_group":"sum", 
-                                              "decline_group":"sum", 
-                                              "other_reason_group":"sum",
-                                              "patient_id":"nunique"})
-    current_figures = current_figures.rename(columns=group_names)
-
-    current_figures = current_figures.assign(
-        Unvaccinated = current_figures["total"] - current_figures["Vaccinated"]
-                                              - current_figures["Declined"]
-                                              - current_figures["Other reason"]
-        )
-    
-    current_figures = current_figures.transpose()
-    out = compute_uptake_percent(current_figures).transpose().sort_index()
-    
-    fig, ax = plt.subplots()
-    out.plot(kind='bar', stacked=True, ax=ax)
-    ax.set_ylabel("Percent")
-    plt.legend(loc="lower right")
-    fig.savefig(f"output/{backend}/charts/declines_by_wave.png")
-
-    return current_figures
-
-
-# out = current_variation().transpose()
-# out = compute_uptake_percent(out).transpose().sort_index()
-
-# out.plot(kind='bar',stacked=True,)
-# #plt.legend(bbox_to_anchor=(1.05, 1),)
-# plt.show()
 
 def declined_vaccinated(input_path="output/cohort.pickle", output_dir="output"):
     ''' Counts patients who went from "Declined" to "Vaccinated".
