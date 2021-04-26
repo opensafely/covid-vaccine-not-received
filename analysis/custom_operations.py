@@ -62,11 +62,13 @@ def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
         if plot_type=="hist":
             out = practice_figures.copy()
             fig, axs = plt.subplots(1, 2, sharey=True, tight_layout=True)
+            bins = {0: [0,5,10,15,20,25,30,35,40,45,50,100],
+                    1: [0,10,20,30,40,50,60,70,80,90,100,200,300]}
 
             for n, x in enumerate(["decline_per_1000", "decline_per_1000_vacc"]):
                 # set weights to show percent rather than count of practices
                 weights=np.ones(len(out)) / len(out)
-                axs[n].hist(out[x], bins=15, weights=weights)
+                axs[n].hist(out[x], bins=bins[n], weights=weights)
                 axs[n].set_xlabel("Rate per 1000")
                 axs[n].yaxis.set_major_formatter(PercentFormatter(1))
                 axs[0].set_ylabel("Percent of practices")
