@@ -50,17 +50,17 @@ def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
     if backend=="expectations":
         practice_figures = practice_figures.loc[(practice_figures["patient_count"]>10)&(practice_figures["vacc_group"]>0)]
     else:
-        practice_figures = practice_figures.loc[(practice_figures["patient_count"]>100)&(practice_figures["vacc_group"]>0)]
+        practice_figures = practice_figures.loc[(practice_figures["patient_count"]>200)&(practice_figures["vacc_group"]>0)]
     
     practice_figures = practice_figures.assign(
         decline_per_1000 = 1000*practice_figures["decline_group"]/practice_figures["patient_count"],
-        decline_per_1000_vacc = 1000*practice_figures["decline_group"]/practice_figures["vacc_group"]
+        decline_per_1000_vacc = 1000*practice_figures["decline_group"]/practice_figures["vacc_group"],
+        vacc_per_1000 = 1000*practice_figures["vacc_group"]/practice_figures["patient_count"]
     )
-
-    out = practice_figures
 
     for plot_type in ["hist","scatter"]:
         if plot_type=="hist":
+            out = practice_figures.copy()
             fig, axs = plt.subplots(1, 2, sharey=True, tight_layout=True)
 
             for n, x in enumerate(["decline_per_1000", "decline_per_1000_vacc"]):
@@ -75,9 +75,20 @@ def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
                 axs[n].set_title(title)
 
         if plot_type=="scatter":
+            out = practice_figures.copy()
+            # ensure that at least 1% of people in each practice have been vaccinated
+            # (those with a v young population e.g. military may have small numbers)
+            out = out.loc[out["vacc_per_1000"]>10]
+            
+            # group very large practices together to avoid identifiability
+            out1 = out.loc[out["patient_count"]>35_000]
+            out1["patient_count"]=35_000
+            out2 = out.loc[out["patient_count"]<=35_000]
+            
             fig, axs = plt.subplots(2, 1, sharex=True, tight_layout=True, figsize=(6,8))
             for n, x in enumerate(["decline_group", "decline_per_1000_vacc"]):
-                axs[n].scatter(out["patient_count"]/1000, out[x])
+                axs[n].scatter(out1["patient_count"]/1000, out1[x], alpha=0.5, marker='s', color='b')
+                axs[n].scatter(out2["patient_count"]/1000, out2[x], alpha=0.5, marker='o', color='b')
                 if "per_1000_vacc" in x:
                     title = "COVID Vaccines Declined\n per 1000 vaccinated patients per practice"
                     ylabel = "Rate per 1000"
