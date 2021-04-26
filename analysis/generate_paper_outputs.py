@@ -336,7 +336,7 @@ def generate_charts_for_wave(
     in_path, out_path, wave, key, earliest_date, latest_date, demographic_titles, label_maps, title_start
 ):
     for col in cols:
-        title = f"{title_start} in Priority Group {wave}\nby {demographic_titles[col]}"
+        title = f"{title_start} in Priority Group {wave} ({wave_column_headings[str(wave)]})\nby {demographic_titles[col]}"
         labels = label_maps[col]
         uptake = load_uptake(
             f"{in_path}/group_{wave}_{key}_by_{col}.csv", earliest_date, latest_date
@@ -462,7 +462,8 @@ def generate_report_for_wave(
 
     subtitle = subtitles[key]
 
-    subtitle = f"{subtitle} / Priority Group {wave}"
+    subtitle = f"{subtitle} / Priority Group {wave} ({wave_column_headings[str(wave)]}"
+    
 
     try:
         summary = pd.read_csv(f"{tables_path}/group_{wave}_{key}.csv", index_col=[0, 1])

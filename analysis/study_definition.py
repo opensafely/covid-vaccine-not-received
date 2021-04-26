@@ -399,6 +399,10 @@ study = StudyDefinition(
         on_or_before="index_date",
         on_or_after="2020-11-29",
         date_format="YYYY-MM-DD",
+        return_expectations={
+            "rate": "exponential_increase",
+            "incidence": 0.5,
+        }
     ),
     # Second COVID vaccination medication code (any)
     covrx2_dat=patients.with_vaccination_record(
@@ -417,6 +421,10 @@ study = StudyDefinition(
         on_or_before="index_date",
         on_or_after="covrx1_dat + 19 days",
         date_format="YYYY-MM-DD",
+        return_expectations={
+            "rate": "exponential_increase",
+            "incidence": 0.5,
+        }
     ),
 
     # Patients in long-stay nursing and residential care
@@ -520,6 +528,7 @@ study = StudyDefinition(
         return_expectations={
             "date": {"earliest": "2019-01-01", "latest": "today"},
             "rate": "exponential_increase",
+            "incidence": 0.1
         }
     ),
     # Second COVID vaccination declined
