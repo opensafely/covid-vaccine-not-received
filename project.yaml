@@ -25,6 +25,13 @@ actions:
       highly_sensitive:
         cohort: output/cohort.pickle
 
+  count_prevalences:
+    run: python:latest python analysis/count_prevalences.py
+    needs: [transform]
+    outputs:
+      moderately_sensitive:
+        table: output/*/tables/prevalences.csv
+
   compute_uptake_for_paper:
     run: python:latest python analysis/compute_uptake_for_paper.py
     needs: [transform]
