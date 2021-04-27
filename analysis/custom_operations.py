@@ -56,7 +56,7 @@ def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
     # summarise data
     practice_count = len(practice_figures.index)
     counts = practice_figures.loc[practice_figures["decline_group"]>0]["decline_group"].count()
-    d = {"practices with declines":practice_count, "total practices":counts}
+    d = {"practices with declines":counts, "total practices":practice_count}
     out = pd.Series(d, index=["practices with declines", "total practices"])
     out.to_csv(f"{output_dir}/{backend}/tables/practice_decline_summary.csv")
 
@@ -75,15 +75,16 @@ def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
             labels = {}
 
             for n, x in enumerate(["decline_per_1000", "decline_per_1000_vacc"]):
-                labels[n] = [str(i) for i in bins[n][:-1]]
+                labels[n] = [str(a)+"-<"+str(b) for (a,b) in zip(bins[n][:-1], bins[n][1:])]
                 binned = pd.cut(out[x], bins=bins[n], labels=labels[n], retbins=False, include_lowest=True, right=False)
-                binned = binned.sort_values()
-                # set weights to show percent rather than count of practices
-                weights=np.ones(len(binned)) / len(binned)
-                axs[n].hist(binned, weights=weights)
+                binned = pd.DataFrame(binned.value_counts(normalize=True)).sort_index()
+
+                axs[n].bar(binned.index, binned[x])
                 axs[n].set_xlabel("Rate per 1000")
                 axs[n].yaxis.set_major_formatter(PercentFormatter(1))
                 axs[0].set_ylabel("Percent of practices")
+                for tick in axs[n].get_xticklabels():
+                    tick.set_rotation(90)
 
                 title = "COVID Vaccines "+ x.replace("_"," ").replace("decline", "declined\n").replace("vacc","vaccinated").title()+" Patients"
                 axs[n].set_title(title)
