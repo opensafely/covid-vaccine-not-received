@@ -96,7 +96,7 @@ def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
             
             # group very large practices together to avoid identifiability
             out1 = out.loc[out["patient_count"]>=25_000]
-            out1["patient_count"]= np.where(out["patient_count"]>35_000, 35_000, 30_000)
+            out1["patient_count"]= np.where(out1["patient_count"]>35_000, 35_000, 30_000)
             out2 = out.loc[out["patient_count"]<25_000]
             
             fig, axs = plt.subplots(2, 1, sharex=True, tight_layout=True, figsize=(6,8))
