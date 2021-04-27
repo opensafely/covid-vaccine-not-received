@@ -44,11 +44,12 @@ def count_prevalences(cohort):
         prevalences[f"ethnicity_{high_level_ethnicity_category}"].loc["total"] = eth_total
 
     prevalences.fillna(0, inplace=True)
+    prevalences = ((prevalences // 7) * 7).astype(int)
 
     for c in prevalences.columns:
-        prevalences[f"{c}_percent"] = 100*prevalences[c]/prevalences["total"]
+        prevalences[f"{c}_percent"] = (100*prevalences[c]/prevalences["total"]).round(1)
     prevalences.fillna(0, inplace=True)
-    return ((prevalences // 7) * 7).astype(int)
+    return (prevalences)
 
 
 prevalences = count_prevalences(cohort)

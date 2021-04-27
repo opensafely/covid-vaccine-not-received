@@ -58,7 +58,7 @@ def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
     counts = practice_figures.loc[practice_figures["decline_group"]>0]["decline_group"].count()
     d = {"practices with declines":practice_count, "total practices":counts}
     out = pd.Series(d, index=["practices with declines", "total practices"])
-    out.to_csv(f"{output_dir}/{backend}/practice_decline_summary.csv")
+    out.to_csv(f"{output_dir}/{backend}/tables/practice_decline_summary.csv")
 
     practice_figures = practice_figures.assign(
         decline_per_1000 = 1000*practice_figures["decline_group"]/practice_figures["patient_count"],
@@ -70,13 +70,17 @@ def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
         if plot_type=="hist":
             out = practice_figures.copy()
             fig, axs = plt.subplots(1, 2, sharey=True, tight_layout=True)
-            bins = {0: [0,5,10,15,20,25,30,35,40,45,50,100],
-                    1: [0,10,20,30,40,50,60,70,80,90,100,200,300]}
+            bins = {0: [0,5,10,15,20,25,30,35,40,45,50,100,500],
+                    1: [0,10,20,30,40,50,60,70,80,90,100,200,300,1000]}
+            labels = {}
 
             for n, x in enumerate(["decline_per_1000", "decline_per_1000_vacc"]):
+                labels[n] = [str(i) for i in bins[n][:-1]]
+                binned = pd.cut(out[x], bins=bins[n], labels=labels[n], retbins=False, include_lowest=True, right=False)
+                binned = binned.sort_values()
                 # set weights to show percent rather than count of practices
-                weights=np.ones(len(out)) / len(out)
-                axs[n].hist(out[x], bins=bins[n], weights=weights, density=True)
+                weights=np.ones(len(binned)) / len(binned)
+                axs[n].hist(binned, weights=weights)
                 axs[n].set_xlabel("Rate per 1000")
                 axs[n].yaxis.set_major_formatter(PercentFormatter(1))
                 axs[0].set_ylabel("Percent of practices")
