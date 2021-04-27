@@ -49,9 +49,17 @@ def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
     # remove tiny practices and ensure that at least one patient has been vaccinated in each practice
     if backend=="expectations":
         practice_figures = practice_figures.loc[(practice_figures["patient_count"]>10)&(practice_figures["vacc_group"]>0)]
+        
     else:
         practice_figures = practice_figures.loc[(practice_figures["patient_count"]>200)&(practice_figures["vacc_group"]>0)]
     
+    # summarise data
+    practice_count = len(practice_figures.index)
+    counts = practice_figures.loc[practice_figures["decline_group"]>0]["decline_group"].count()
+    d = {"practices with declines":practice_count, "total practices":counts}
+    out = pd.Series(d, index=["practices with declines", "total practices"])
+    out.to_csv(f"{output_dir}/{backend}/practice_decline_summary.csv")
+
     practice_figures = practice_figures.assign(
         decline_per_1000 = 1000*practice_figures["decline_group"]/practice_figures["patient_count"],
         decline_per_1000_vacc = 1000*practice_figures["decline_group"]/practice_figures["vacc_group"],
@@ -68,7 +76,7 @@ def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
             for n, x in enumerate(["decline_per_1000", "decline_per_1000_vacc"]):
                 # set weights to show percent rather than count of practices
                 weights=np.ones(len(out)) / len(out)
-                axs[n].hist(out[x], bins=bins[n], weights=weights)
+                axs[n].hist(out[x], bins=bins[n], weights=weights, density=True)
                 axs[n].set_xlabel("Rate per 1000")
                 axs[n].yaxis.set_major_formatter(PercentFormatter(1))
                 axs[0].set_ylabel("Percent of practices")
@@ -83,9 +91,9 @@ def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
             out = out.loc[out["vacc_per_1000"]>10]
             
             # group very large practices together to avoid identifiability
-            out1 = out.loc[out["patient_count"]>35_000]
-            out1["patient_count"]=35_000
-            out2 = out.loc[out["patient_count"]<=35_000]
+            out1 = out.loc[out["patient_count"]>=25_000]
+            out1["patient_count"]= np.where(out["patient_count"]>35_000, 35_000, 30_000)
+            out2 = out.loc[out["patient_count"]<25_000]
             
             fig, axs = plt.subplots(2, 1, sharex=True, tight_layout=True, figsize=(6,8))
             for n, x in enumerate(["decline_group", "decline_per_1000_vacc"]):

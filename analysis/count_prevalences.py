@@ -2,13 +2,13 @@ import os
 import pandas as pd
 
 
-def run(input_path="output/cohort.pickle"):
-    backend = os.getenv("OPENSAFELY_BACKEND", "expectations")
-    output_path = "output/" + backend + "/tables/prevalences.csv"
+input_path="output/cohort.pickle"
+backend = os.getenv("OPENSAFELY_BACKEND", "expectations")
+output_path = "output/" + backend + "/tables"
+os.makedirs(output_path, exist_ok=True)
 
-    cohort = pd.read_pickle(input_path)
-    prevalences = count_prevalences(cohort)
-    prevalences.to_csv(output_path)
+cohort = pd.read_pickle(input_path)
+
 
 def count_prevalences(cohort):
     prevalences = pd.DataFrame(
@@ -50,4 +50,6 @@ def count_prevalences(cohort):
     prevalences.fillna(0, inplace=True)
     return ((prevalences // 7) * 7).astype(int)
 
-run()
+
+prevalences = count_prevalences(cohort)
+prevalences.to_csv(output_path+"/prevalences.csv")
