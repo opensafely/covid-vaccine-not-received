@@ -17,7 +17,7 @@ group_cols = [
 
 extra_at_risk_cols = [group for group in at_risk_groups if group not in group_cols]
 
-extra_cols = ["patient_id", "vacc1_dat", "vacc2_dat", "wave"]
+extra_cols = ["patient_id", "vacc1_dat", "vacc2_dat", "wave", "wave2"]
 
 vacc_cols = []
 for prefix in ["decl", "vacc_any_record", "cov2not"]:
@@ -72,6 +72,7 @@ def transform(cohort):
     add_age_bands(cohort, range(1, 12 + 1))
     add_groupings(cohort)
     add_waves(cohort)
+    add_waves_2(cohort)
     add_extra_at_risk_cols(cohort)
     return cohort
 
@@ -250,6 +251,18 @@ def add_waves(cohort):
     # Wave 9: Age 50 - 54
     s.mask((s == 0) & (cohort["age"] >= 50), 9, inplace=True)
 
+def add_waves_2(cohort):
+    cohort["wave2"] = 0
+    s = cohort["wave2"]
+
+    # Wave 2.1: Residents in Care Homes and those over 65 (waves 1-3 & 5)
+    s.mask(cohort["wave"].isin([1,2,3,5]), 1, inplace=True)
+
+    # Wave 2.2: CEV (aged 16-69) and At Risk (aged 16-64)
+    s.mask((s == 0) & cohort["wave"].isin([4,6]), 2, inplace=True)
+
+    # Wave 2.3: 50-64
+    s.mask((s == 0) & cohort["wave"].isin([7,8,9]), 3, inplace=True)
 
 def add_extra_at_risk_cols(cohort):
     """Add columns for extra at-risk groups."""

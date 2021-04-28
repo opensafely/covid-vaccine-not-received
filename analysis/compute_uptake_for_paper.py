@@ -36,32 +36,45 @@ def run(input_path="output/cohort.pickle", output_dir="output"):
         uptake = compute_uptake(cohort, event_col, "wave")
         uptake.to_csv(f"{dir_path}/all_{key}_by_group.csv")
 
+        # Compute uptake by broader waves (1-3)
+        uptake_w2 = compute_uptake(cohort, event_col, "wave2")
+        uptake.to_csv(f"{dir_path}/all_{key}_by_group2.csv")
+
         # for "any vaccine record" calculate the inverse ie. no of patients with NO vaccine related record
         if event_col == "vacc_any_record_dat":
-            uptake2 = invert_df(uptake)
+            uptake_inv = invert_df(uptake)
+            uptake2_inv = invert_df(uptake_w2)
             out_path = f"{base_path}/all/unreached"
             os.makedirs(out_path, exist_ok=True)
-            uptake2.to_csv(f"{out_path}/all_unreached_by_group.csv")
+            uptake_inv.to_csv(f"{out_path}/all_unreached_by_group.csv")
+            uptake2_inv.to_csv(f"{out_path}/all_unreached_by_group2.csv")
 
         # For each wave, compute uptake by column
         for wave in range(1, 9 + 1):
-            os.makedirs(dir_path, exist_ok=True)
-            wave_cohort = cohort[cohort["wave"] == wave]
+            group_type=""
+            compute_uptake_for_wave(cohort, wave, cols, event_col, key, group_type, base_path, dir_path)
+        for wave2 in range(1, 3 + 1):
+            group_type = "2"
+            compute_uptake_for_wave(cohort, wave2, cols, event_col, key, group_type, base_path, dir_path)
 
-            for col in cols:
-                dir_path = f"{base_path}/group_{wave}/{key}"
-                os.makedirs(dir_path, exist_ok=True)
-                uptake = compute_uptake(wave_cohort, event_col, col)
-                if uptake is None:
-                    continue
-                uptake.to_csv(f"{dir_path}/group_{wave}_{key}_by_{col}.csv")
-            
-                if event_col == "vacc_any_record_dat":
-                    uptake2 = invert_df(uptake)
-                    out_path = f"{base_path}/group_{wave}/unreached"
-                    os.makedirs(out_path, exist_ok=True)
-                    uptake2.to_csv(f"{out_path}/group_{wave}_unreached_by_{col}.csv")
 
+def compute_uptake_for_wave(cohort, wave, cols, event_col, key, group_type, base_path, dir_path):
+    os.makedirs(dir_path, exist_ok=True)
+    wave_cohort = cohort[cohort[f"wave{group_type}"] == wave]
+
+    for col in cols:
+        dir_path = f"{base_path}/group{group_type}_{wave}/{key}"
+        os.makedirs(dir_path, exist_ok=True)
+        uptake = compute_uptake(wave_cohort, event_col, col)
+        if uptake is None:
+            continue
+        uptake.to_csv(f"{dir_path}/group_{wave}_{key}_by_{col}.csv")
+
+        if event_col == "vacc_any_record_dat":
+            uptake2 = invert_df(uptake)
+            out_path = f"{base_path}/group{group_type}_{wave}/unreached"
+            os.makedirs(out_path, exist_ok=True)
+            uptake2.to_csv(f"{out_path}/group{group_type}_{wave}_unreached_by_{col}.csv")
 
 if __name__ == "__main__":
     run()
