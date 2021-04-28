@@ -22,7 +22,7 @@ extra_cols = ["patient_id", "vacc1_dat", "vacc2_dat", "wave"]
 vacc_cols = []
 for prefix in ["decl", "vacc_any_record", "cov2not"]:
     vacc_cols.append(f"{prefix}_dat")
-for prefix in ["vacc", "decline", "other_reason", "declined_accepted"]:
+for prefix in ["vacc", "decline", "decline_total", "other_reason", "declined_accepted"]:
     vacc_cols.append(f"{prefix}_group")
     
 

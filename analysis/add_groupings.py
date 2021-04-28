@@ -8,6 +8,9 @@ def add_groupings(df):
     # Patients with a decline (but no vaccination)
     df["decline_group"] = df["decl_dat"].notnull() & df["vacc1_dat"].isnull() & df["vacc2_dat"].isnull()
 
+    # Patients with a decline (irrespective of vaccination status)
+    df["decline_total_group"] = df["decl_dat"].notnull()
+
     # Patients with a decline and a later vaccination
     # check that declined date is within the vaccination campaign period not in the past
     # (otherwise exclude, as unable determine correct sequence of events)
@@ -173,6 +176,7 @@ def add_groupings(df):
     #
     # IF PREG_DAT<> NULL        | Next   | Reject
     # IF PREGDEL_DAT > PREG_DAT | Reject | Select
-    df["preg_group"] = df["preg_dat"].notnull() & lte(df["pregdel_dat"], df["preg_dat"]) \
-                        & df["sex"]=="F" & df["age"]<50
+    df["preg_group"] = df["preg_dat"].notnull() & lte(df["pregdel_dat"], df["preg_dat"]) & (
+                        df["sex"]=="F") & (df["age"]<50
+                        )
 

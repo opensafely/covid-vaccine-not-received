@@ -7,9 +7,25 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import PercentFormatter
 
+wave_column_headings = {
+    "total": "All",
+    "all_priority": "Priority groups",
+    "1": "In care home",
+    "2": "80+",
+    "3": "70-79",
+    "4": "CEV",
+    "5": "65-69",
+    "6": "At risk",
+    "7": "60-64",
+    "8": "55-59",
+    "9": "50-54",
+    "0": "Other",
+}
+
 group_names = {
     "vacc_group":"Vaccinated", 
     "decline_group":"Declined", 
+    "decline_total_group":"Declined - all",
     "other_reason_group":"Other reason",
     "declined_accepted_group": "Declined then accepted",
     "patient_id":"total"
@@ -119,37 +135,43 @@ def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
 
 
 
-def declined_vaccinated(input_path="output/cohort.pickle", output_dir="output"):
+def declined_vaccinated(input_path="output/cohort.pickle", output_dir="output", wave_column_headings=wave_column_headings):
     ''' Counts patients who went from "Declined" to "Vaccinated".
         Creates a chart. 
     '''
     backend = os.getenv("OPENSAFELY_BACKEND", "expectations")
     base_path = f"{output_dir}/{backend}/coverage_to_date"
     cohort = pd.read_pickle(input_path)
+    print(cohort.columns)
 
-    cohort = cohort[["wave", "vacc_group", "declined_accepted_group", "patient_id"]]\
+    cohort["wave"] = cohort["wave"].astype(str)
+    cohort = cohort[["wave", "vacc_group", "declined_accepted_group", "decline_total_group", "patient_id"]]\
                         .groupby("wave").agg({"vacc_group":"sum", 
                                               "declined_accepted_group":"sum", 
+                                              "decline_total_group":"sum", 
                                               "patient_id":"nunique"})
-    cohort = cohort.rename(columns=group_names)
+    cohort = cohort.rename(columns=group_names, index=wave_column_headings)
 
     cohort = cohort.assign(
         per_1000 = 1000*cohort["Declined then accepted"]/cohort["total"],
-        per_1000_vacc = 1000*cohort["Declined then accepted"]/cohort["Vaccinated"]
+        per_1000_vacc = 1000*cohort["Declined then accepted"]/cohort["Vaccinated"],
+        converted = 1000*cohort["Declined then accepted"]/cohort["Declined - all"]
     )
     
-    fig, axs = plt.subplots(2, 1, sharex=True, tight_layout=True, figsize=(6,8))
-    for n, x in enumerate(["per_1000", "per_1000_vacc"]):
+    fig, axs = plt.subplots(3, 1, sharex=True, tight_layout=True, figsize=(6,12))
+    for n, x in enumerate(["per_1000", "per_1000_vacc", "converted"]):
         cohort[x].plot(kind='bar', stacked=True, ax=axs[n])
         if x=="per_1000_vacc":
             title = "Patients Declining and later Accepting COVID Vaccines\n per 1000 vaccinated patients"  
+        elif x=="converted":
+            title = "Patients Declining and later Accepting COVID Vaccines\n per 1000 patients who declined"
         else:
             title = "Patients Declining and later Accepting COVID Vaccines\n per 1000 patients"
         
         axs[n].set_ylabel("Rate per 1000")
         axs[n].set_title(title)
 
-    axs[1].set_xlabel("Cohort")
+    axs[1].set_xlabel("Priority group")
 
     fig.savefig(f"output/{backend}/charts/all_declined_then_accepted_by_wave.png")
 

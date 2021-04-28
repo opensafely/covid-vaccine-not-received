@@ -17,7 +17,7 @@ def count_prevalences(cohort):
 
     pop_total = cohort["patient_id"].count()
     
-    cols = ["vacc_group", "decline_group","other_reason_group", "declined_accepted_group", "preg_group"]
+    cols = ["vacc_group", "decline_group","decline_total_group","other_reason_group", "declined_accepted_group", "preg_group"]
     
     for col in cols:
         prevalences[col] = (
