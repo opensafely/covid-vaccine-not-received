@@ -173,4 +173,6 @@ def add_groupings(df):
     #
     # IF PREG_DAT<> NULL        | Next   | Reject
     # IF PREGDEL_DAT > PREG_DAT | Reject | Select
-    df["preg_group"] = df["preg_dat"].notnull() & lte(df["pregdel_dat"], df["preg_dat"])
+    df["preg_group"] = df["preg_dat"].notnull() & lte(df["pregdel_dat"], df["preg_dat"]) \
+                        & df["sex"]=="F" & df["age"]<50
+
