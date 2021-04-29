@@ -7,7 +7,9 @@ from custom_operations import invert_df
 
 
 demographic_cols = [
-    "ethnicity",
+    "age_band",
+    "sex",
+    #"ethnicity",
     "high_level_ethnicity",
     "imd_band",
 ]

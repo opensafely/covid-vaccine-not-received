@@ -142,7 +142,6 @@ def declined_vaccinated(input_path="output/cohort.pickle", output_dir="output", 
     backend = os.getenv("OPENSAFELY_BACKEND", "expectations")
     base_path = f"{output_dir}/{backend}/coverage_to_date"
     cohort = pd.read_pickle(input_path)
-    print(cohort.columns)
 
     cohort["wave"] = cohort["wave"].astype(str)
     cohort = cohort[["wave", "vacc_group", "declined_accepted_group", "decline_total_group", "patient_id"]]\

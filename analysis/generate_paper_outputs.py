@@ -12,23 +12,31 @@ import pandas as pd
 from compute_uptake_for_paper import cols, demographic_cols, other_cols
 from ethnicities import ethnicities, high_level_ethnicities
 from groups import groups, at_risk_groups
+from age_bands import age_bands
 
 # Ensure SVGs are created reproducibly
 mpl.rcParams["svg.hashsalt"] = 42
 
-wave_column_headings = {
-    "total": "All",
-    "all_priority": "Priority groups",
-    "1": "In care home",
-    "2": "80+",
-    "3": "70-79",
-    "4": "CEV",
-    "5": "65-69",
-    "6": "At risk",
-    "7": "60-64",
-    "8": "55-59",
-    "9": "50-54",
-    "0": "Other",
+wave_column_headings = {"":
+        {"total": "All",
+        "all_priority": "Priority groups",
+        "1": "In care home",
+        "2": "80+",
+        "3": "70-79",
+        "4": "CEV",
+        "5": "65-69",
+        "6": "At risk",
+        "7": "60-64",
+        "8": "55-59",
+        "9": "50-54",
+        "0": "Other"},
+    "2":
+        {"total": "All",
+        "all_priority": "Priority groups",
+        "1": "65+ / in care home",
+        "2": "CEV / At Risk",
+        "3": "50-64",
+        "0": "Other"},
 }
 
 
@@ -66,90 +74,83 @@ def run(base_path, earliest_date, latest_date):
 
     tables_path = f"{base_path}/tables"
     charts_path = f"{base_path}/charts"
-    reports_path = f"{base_path}/reports"
+    #reports_path = f"{base_path}/reports"
     os.makedirs(tables_path, exist_ok=True)
     os.makedirs(charts_path, exist_ok=True)
-    os.makedirs(reports_path, exist_ok=True)
+    #os.makedirs(reports_path, exist_ok=True)
     
 
-    generate_stacked_charts_for_all(base_path, charts_path,
-                                    earliest_date,latest_date,
-                                    )
+    for group_type in ["2", ""]:
+        if group_type == "":
+            waves = range(1, 9 + 1)
+        elif group_type == "2":
+            waves = range(1, 3 + 1)
 
-    for wave in range(1, 9 +1):
-        generate_stacked_charts_for_wave(
+        generate_stacked_charts_for_all(base_path, charts_path,
+                                    earliest_date,latest_date, group_type
+                                    )    
+
+        for wave in waves:
+            generate_stacked_charts_for_wave(
                     base_path,
                     charts_path,
                     wave,
                     earliest_date,
                     latest_date,
                     demographic_titles,
-                    label_maps
+                    label_maps,
+                    group_type
                 )
 
-    for key in ["dose_1", 
-                "unreached",
-                "declined"]:
-        in_path = f"{base_path}/cumulative_coverage/all/{key}/all_{key}_by_group.csv"
-        title_start = title_starts[key]
-        title_end = title_ends[key]
-        generate_summary_table_for_all(
-            in_path, tables_path, key, earliest_date, latest_date, title_start
-        )
-        generate_charts_for_all(in_path, charts_path, key, earliest_date, latest_date, title_end)
-        generate_report_for_all(
-            backend,
-            tables_path,
-            charts_path,
-            reports_path,
-            key,
-            earliest_date,
-            latest_date,
-            subtitles
-        )
+        for key in ["dose_1", 
+                    "unreached",
+                    "declined"]:
+            in_path = f"{base_path}/cumulative_coverage/all/{key}/all_{key}_by_group{group_type}.csv"
+            title_start = title_starts[key]
+            title_end = title_ends[key]
+            generate_summary_table_for_all(
+                in_path, tables_path, key, earliest_date, latest_date, title_start, group_type, waves
+            )
+            generate_charts_for_all(
+                in_path, charts_path, key, earliest_date, latest_date, title_end, group_type, waves
+            )
+            #generate_report_for_all(backend,tables_path,charts_path,reports_path,key,earliest_date,latest_date,subtitles,group_type)
+            
+            for wave in waves:
+                in_path = f"{base_path}/cumulative_coverage/group{group_type}_{wave}/{key}"
+
+                generate_summary_table_for_wave(
+                    in_path,
+                    tables_path,
+                    wave,
+                    key,
+                    earliest_date,
+                    latest_date,
+                    demographic_titles,
+                    label_maps, 
+                    title_start,
+                    group_type
+                )
+
+                generate_charts_for_wave(
+                    in_path,
+                    charts_path,
+                    wave,
+                    key,
+                    earliest_date,
+                    latest_date,
+                    demographic_titles,
+                    label_maps, 
+                    title_start,
+                    group_type
+                )
+
+                #generate_report_for_wave(backend,tables_path,charts_path,reports_path,wave,key,earliest_date,latest_date,subtitles)
         
-        for wave in range(1, 9 + 1):
-            in_path = f"{base_path}/cumulative_coverage/group_{wave}/{key}"
-
-            generate_summary_table_for_wave(
-                in_path,
-                tables_path,
-                wave,
-                key,
-                earliest_date,
-                latest_date,
-                demographic_titles,
-                label_maps, 
-                title_start
-            )
-
-            generate_charts_for_wave(
-                in_path,
-                charts_path,
-                wave,
-                key,
-                earliest_date,
-                latest_date,
-                demographic_titles,
-                label_maps, 
-                title_start
-            )
-
-            generate_report_for_wave(
-                backend,
-                tables_path,
-                charts_path,
-                reports_path,
-                wave,
-                key,
-                earliest_date,
-                latest_date,
-                subtitles
-            )
-
+     
 
 def generate_summary_table_for_all(
-    in_path, tables_path, key, earliest_date, latest_date, title_start
+    in_path, tables_path, key, earliest_date, latest_date, title_start, group_type, waves
 ):
     uptake = load_uptake(in_path, earliest_date, latest_date)
     last_week_date = uptake.index[-9]
@@ -175,17 +176,18 @@ def generate_summary_table_for_all(
     }
     summary = summary[list(columns)]
     summary.rename(columns=columns, inplace=True)
+    
+    rows = {str(wave): f"Group {wave}" for wave in waves}
 
-    rows = {str(wave): f"Group {wave}" for wave in range(1, 9 + 1)}
     rows["0"] = "Other"
     rows["total"] = "Population"
     summary = summary.loc[list(rows)]
     summary.rename(index=rows, inplace=True)
 
-    summary.to_csv(f"{tables_path}/all_{key}.csv", float_format="%.1f%%")
+    summary.to_csv(f"{tables_path}/all{group_type}_{key}.csv", float_format="%.1f%%")
 
 
-def generate_charts_for_all(in_path, charts_path, key, earliest_date, latest_date, title_end):
+def generate_charts_for_all(in_path, charts_path, key, earliest_date, latest_date, title_end, group_type, waves):
     uptake = load_uptake(in_path, earliest_date, latest_date)
     if uptake.iloc[-2].max()>1_000_000:
         uptake_total = uptake.iloc[:-1] / 1_000_000
@@ -193,48 +195,49 @@ def generate_charts_for_all(in_path, charts_path, key, earliest_date, latest_dat
     else: 
         uptake_total = uptake.iloc[:-1] / 1_000
         units="thousands"
-    uptake_total["total"] = uptake_total.loc[:, "0":"9"].sum(axis=1)
-    uptake_total["all_priority"] = uptake_total.loc[:, "1":"9"].sum(axis=1)
+    
+    uptake_total["total"] = uptake_total.loc[:, str(waves[0]):str(waves[-1])].sum(axis=1)
+    uptake_total["all_priority"] = uptake_total.loc[:, str(waves[0]):str(waves[-1])].sum(axis=1)
     uptake_total = uptake_total.loc[:, ["total", "all_priority", "0"]]
     uptake_total = uptake_total[
-        [col for col in wave_column_headings if col in uptake_total.columns]
+        [col for col in wave_column_headings[group_type] if col in uptake_total.columns]
     ]
-    uptake_total.rename(columns=wave_column_headings, inplace=True)
+    uptake_total.rename(columns=wave_column_headings[group_type], inplace=True)
     plot_chart(
         uptake_total,
         f"Total number of patients {title_end} ({units})",
-        f"{charts_path}/all_{key}_total.png",
+        f"{charts_path}/all_{key}_total{group_type}.png",
         is_percent=False,
     )
 
     uptake_pc = 100 * uptake / uptake.loc["total"]
     uptake_pc.drop("total", inplace=True)
     uptake_pc.fillna(0, inplace=True)
-    columns = {str(wave): f"Group {wave}" for wave in range(1, 9 + 1)}
+    columns = {str(wave): f"Group {wave}" for wave in waves}
     columns["0"] = "Other"
     uptake_pc = uptake_pc[
-        [col for col in wave_column_headings if col in uptake_pc.columns]
+        [col for col in wave_column_headings[group_type] if col in uptake_pc.columns]
     ]
-    uptake_pc.rename(columns=wave_column_headings, inplace=True)
+    uptake_pc.rename(columns=wave_column_headings[group_type], inplace=True)
     plot_chart(
         uptake_pc,
         f"Proportion of patients {title_end}",
-        f"{charts_path}/all_{key}_percent.png",
+        f"{charts_path}/all_{key}_percent{group_type}.png",
     )
 
 
 def generate_report_for_all(
-    backend, tables_path, charts_path, out_path, key, earliest_date, latest_date, subtitles
+    backend, tables_path, charts_path, out_path, key, earliest_date, latest_date, subtitles, group_type
 ):
 
     subtitle = subtitles[key]
 
-    summary = pd.read_csv(f"{tables_path}/all_{key}.csv", index_col=0)
+    summary = pd.read_csv(f"{tables_path}/all{group_type}_{key}.csv", index_col=0)
 
     charts = []
-    with open(f"{charts_path}/all_{key}_total.png", "rb") as f:
+    with open(f"{charts_path}/all_{key}_total{group_type}.png", "rb") as f:
         charts.append(base64.b64encode(f.read()).decode("utf8"))
-    with open(f"{charts_path}/all_{key}_percent.png", "rb") as f:
+    with open(f"{charts_path}/all_{key}_percent{group_type}.png", "rb") as f:
         charts.append(base64.b64encode(f.read()).decode("utf8"))
 
     ctx = {
@@ -250,17 +253,20 @@ def generate_report_for_all(
     with open("templates/summary.html") as f:
         template = jinja2.Template(f.read())
 
-    with open(f"{out_path}/all_{key}.html", "w") as f:
+    with open(f"{out_path}/all{group_type}_{key}.html", "w") as f:
         f.write(template.render(ctx))
 
 
 def generate_summary_table_for_wave(
-    in_path, out_path, wave, key, earliest_date, latest_date, demographic_titles, label_maps, title_start
+    in_path, out_path, wave, key, earliest_date, latest_date, demographic_titles, label_maps, title_start, group_type
 ):
     uptake = load_uptake(
-        f"{in_path}/group_{wave}_{key}_by_ethnicity.csv", earliest_date, latest_date
+        f"{in_path}/group{group_type}_{wave}_{key}_by_ethnicity.csv", earliest_date, latest_date
     )
     if uptake is None:
+        return
+    if len(uptake.columns)==1:
+        print(uptake.head())
         return
 
     last_week_date = uptake.index[-9]
@@ -274,7 +280,7 @@ def generate_summary_table_for_wave(
         demographic_title = demographic_titles[col]
         labels = label_maps[col]
         uptake = load_uptake(
-            f"{in_path}/group_{wave}_{key}_by_{col}.csv", earliest_date, latest_date
+            f"{in_path}/group{group_type}_{wave}_{key}_by_{col}.csv", earliest_date, latest_date
         )
 
         if col in demographic_cols:
@@ -311,7 +317,7 @@ def generate_summary_table_for_wave(
     summary = summary[list(columns)]
     summary.rename(columns=columns, inplace=True)
 
-    summary.to_csv(f"{out_path}/group_{wave}_{key}.csv", float_format="%.1f%%")
+    summary.to_csv(f"{out_path}/group{group_type}_{wave}_{key}.csv", float_format="%.1f%%")
 
 
 def compute_summary(uptake, labels=None):
@@ -333,10 +339,10 @@ def compute_summary(uptake, labels=None):
 
 
 def generate_charts_for_wave(
-    in_path, out_path, wave, key, earliest_date, latest_date, demographic_titles, label_maps, title_start
+    in_path, out_path, wave, key, earliest_date, latest_date, demographic_titles, label_maps, title_start, group_type
 ):
     for col in cols:
-        title = f"{title_start} in Priority Group {wave} ({wave_column_headings[str(wave)]})\nby {demographic_titles[col]}"
+        title = f"{title_start} in Priority Group {wave} ({wave_column_headings[group_type][str(wave)]})\nby {demographic_titles[col]}"
         labels = label_maps[col]
         uptake = load_uptake(
             f"{in_path}/group_{wave}_{key}_by_{col}.csv", earliest_date, latest_date
@@ -347,30 +353,22 @@ def generate_charts_for_wave(
         cohort_average = 100 * uptake.sum(axis=1).iloc[-2] / uptake.sum(axis=1).iloc[-1]
         uptake_pc = compute_uptake_percent(uptake, labels)
         plot_chart(
-            uptake_pc, title, f"{out_path}/group_{wave}_{key}_{col}.png", cohort_average,
+            uptake_pc, title, f"{out_path}/group{group_type}_{wave}_{key}_{col}.png", cohort_average,
         )
 
-        if col == "ethnicity":
-            plot_chart(
-                uptake_pc,
-                title,
-                f"{out_path}/group_{wave}_{key}_{col}_highlighting_bangladeshi_ethnicity.png",
-                cohort_average,
-                highlight_bangladeshi_ethnicity=True,
-            )
 
 
 def generate_stacked_charts_for_all(
-    base_path, out_path, earliest_date, latest_date
+    base_path, out_path, earliest_date, latest_date, group_type
 ):
     title = f"Vaccination and Decline rates\n for each cohort"
-    labels = wave_column_headings
+    labels = wave_column_headings[group_type]
     uptake_by_group = pd.Series()
 
     for key in subtitles: # e.g. declined
         in_path = f"{base_path}/cumulative_coverage/all/{key}"
         uptake = load_uptake(
-            f"{in_path}/all_{key}_by_group.csv", earliest_date, latest_date
+            f"{in_path}/all_{key}_by_group{group_type}.csv", earliest_date, latest_date
         )
         if uptake is None:
             return
@@ -385,7 +383,7 @@ def generate_stacked_charts_for_all(
         uptake_by_group = uptake_by_group.append(uptake)
 
     uptake_pc = compute_uptake_percent(uptake_by_group, labels)
-    uptake_pc = uptake_pc[list(wave_column_headings.values())[2:]]
+    uptake_pc = uptake_pc[list(wave_column_headings[group_type].values())[2:]]
     uptake_pc = uptake_pc.rename(index=subtitles)
     uptake_pc = uptake_pc.transpose()
 
@@ -395,22 +393,22 @@ def generate_stacked_charts_for_all(
     uptake_pc = uptake_pc[["First dose","Declined", "No Vaccine with Reason", "No Vaccine-Related Record"]]
     
     plot_stacked_chart(
-        uptake_pc, title, f"{out_path}/all_vaccinated_declined_by_group.png"
+        uptake_pc, title, f"{out_path}/all_vaccinated_declined_by_group{group_type}.png"
     )
 
 
 
 def generate_stacked_charts_for_wave(
-    base_path, out_path, wave, earliest_date, latest_date, demographic_titles, label_maps
+    base_path, out_path, wave, earliest_date, latest_date, demographic_titles, label_maps, group_type
 ):
     for col in cols: # e.g. ethnicity
-        group_name = wave_column_headings[str(wave)]
+        group_name = wave_column_headings[group_type][str(wave)]
         title = f"Vaccination and Decline rates among those in '{group_name}' group\n by {demographic_titles[col]}"
         labels = label_maps[col]
         uptake_by_dem = pd.Series()
 
         for key in subtitles: # e.g. declined
-            in_path = f"{base_path}/cumulative_coverage/group_{wave}/{key}"
+            in_path = f"{base_path}/cumulative_coverage/group{group_type}_{wave}/{key}"
             uptake = load_uptake(
                 f"{in_path}/group_{wave}_{key}_by_{col}.csv", earliest_date, latest_date
             )
@@ -419,9 +417,9 @@ def generate_stacked_charts_for_wave(
             
             uptake = uptake.rename(index={uptake.index[-2]:key})
             if key=="dose_1":
-                uptake = uptake.tail(2)
+                uptake = uptake.tail(2) # last two rows to include total
             else:
-                uptake = uptake.iloc[-2]
+                uptake = uptake.iloc[-2] # second to last row only
             
             # combine keys (e.g. vaccinated, declined etc)
             uptake_by_dem = uptake_by_dem.append(uptake)
@@ -436,7 +434,7 @@ def generate_stacked_charts_for_wave(
         uptake_pc = uptake_pc[["First dose","Declined", "No vaccine with reason", "No Vaccine-Related Record"]]
 
         plot_stacked_chart(
-            uptake_pc, title, f"{out_path}/wave_{wave}_{key}_{col}.png"
+            uptake_pc, title, f"{out_path}/wave{group_type}_{wave}_{key}_{col}.png"
         )
 
             
@@ -462,7 +460,7 @@ def generate_report_for_wave(
 
     subtitle = subtitles[key]
 
-    subtitle = f"{subtitle} / Priority Group {wave} ({wave_column_headings[str(wave)]}"
+    subtitle = f"{subtitle} / Priority Group {wave} ({wave_column_headings[''][str(wave)]}"
     
 
     try:
@@ -497,6 +495,8 @@ def get_demographic_titles():
         "ethnicity": "Ethnicity",
         "high_level_ethnicity": "Ethnicity (broad categories)",
         "imd_band": "Index of Multiple Deprivation",
+        "sex": "Sex",
+        "age_band": "Age band",
     }
 
     demographic_titles.update(groups)
@@ -506,7 +506,15 @@ def get_demographic_titles():
 
 
 def get_label_maps():
+    age_band_labels = {}
+    for a in age_bands:
+        lower = str(age_bands[a][0]).replace("None","0")
+        upper = str(age_bands[a][1]).replace("None","+")
+        age_band_labels[a] = lower +"-"+ upper
+
     labels = {
+        "sex": {"F": "Female", "M": "Male"},
+        "age_band": age_band_labels,
         "ethnicity": {str(k): v for k, v in ethnicities.items()},
         "high_level_ethnicity": {str(k): v for k, v in high_level_ethnicities.items()},
         "imd_band": {
@@ -533,37 +541,13 @@ def plot_chart(
     title,
     out_path,
     cohort_average=None,
-    is_percent=True,
-    highlight_bangladeshi_ethnicity=False,
+    is_percent=True
 ):
     df.index = pd.to_datetime(df.index)
     ax = plt.gca()
 
-    if highlight_bangladeshi_ethnicity:
-        for col in df.columns:
-            if "Bangladeshi" in col:
-                c, alpha, thickness = "r", 1, 3
-                label = "Asian or Asian British - Bangladeshi"
-            elif "Asian or Asian British" in col:
-                c, alpha, thickness = "r", 0.6, 1
-                label = "Asian or Asian British"
-            else:
-                c, alpha, thickness = "b", 0.3, 1
-                label = "Other ethnicities"
-            ax.plot(df[col], alpha=alpha, c=c, label=label, linewidth=thickness)
-
-        handles, labels = ax.get_legend_handles_labels()
-        by_label = dict(zip(labels, handles))
-        ax.legend(
-            by_label.values(),
-            by_label.keys(),
-            bbox_to_anchor=(1.05, 1),
-            loc=2,
-            borderaxespad=0,
-        )
-    else:
-        df.plot(ax=ax)
-        ax.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0)
+    df.plot(ax=ax)
+    ax.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0)
 
     ax.set_title(title)
 
