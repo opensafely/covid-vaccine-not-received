@@ -45,5 +45,5 @@ actions:
     outputs:
       moderately_sensitive:
         charts: output/*/charts/*.png
-        reports: output/*/reports/*.html
+        #reports: output/*/reports/*.html
         tables: output/*/tables/*.csv
