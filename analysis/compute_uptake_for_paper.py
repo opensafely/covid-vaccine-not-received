@@ -76,7 +76,7 @@ def compute_uptake_for_wave(cohort, wave, cols, event_col, key, group_type, base
             uptake2 = invert_df(uptake)
             out_path = f"{base_path}/group{group_type}_{wave}/unreached"
             os.makedirs(out_path, exist_ok=True)
-            uptake2.to_csv(f"{out_path}/group{group_type}_{wave}_unreached_by_{col}.csv")
+            uptake2.to_csv(f"{out_path}/group_{wave}_unreached_by_{col}.csv")
 
 if __name__ == "__main__":
     run()

@@ -67,7 +67,7 @@ def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
         practice_figures = practice_figures.loc[(practice_figures["patient_count"]>10)&(practice_figures["vacc_group"]>0)]
         
     else:
-        practice_figures = practice_figures.loc[(practice_figures["patient_count"]>200)&(practice_figures["vacc_group"]>0)]
+        practice_figures = practice_figures.loc[(practice_figures["patient_count"]>500)&(practice_figures["vacc_group"]>10)]
     
     # summarise data
     practice_count = len(practice_figures.index)

@@ -53,7 +53,7 @@ title_ends = {
     }
 
 subtitles = {
-        "dose_1": "First dose",
+        "dose_1": "Vaccinated",
         "unreached": "No Vaccine-Related Record",
         "declined": "Declined",
     }
@@ -261,12 +261,9 @@ def generate_summary_table_for_wave(
     in_path, out_path, wave, key, earliest_date, latest_date, demographic_titles, label_maps, title_start, group_type
 ):
     uptake = load_uptake(
-        f"{in_path}/group{group_type}_{wave}_{key}_by_ethnicity.csv", earliest_date, latest_date
+        f"{in_path}/group_{wave}_{key}_by_ethnicity.csv", earliest_date, latest_date
     )
     if uptake is None:
-        return
-    if len(uptake.columns)==1:
-        print(uptake.head())
         return
 
     last_week_date = uptake.index[-9]
@@ -280,8 +277,11 @@ def generate_summary_table_for_wave(
         demographic_title = demographic_titles[col]
         labels = label_maps[col]
         uptake = load_uptake(
-            f"{in_path}/group{group_type}_{wave}_{key}_by_{col}.csv", earliest_date, latest_date
+            f"{in_path}/group_{wave}_{key}_by_{col}.csv", earliest_date, latest_date
         )
+
+        if len(uptake.columns)==1:
+            continue
 
         if col in demographic_cols:
             summaries[demographic_title] = compute_summary(uptake, labels)
@@ -342,7 +342,7 @@ def generate_charts_for_wave(
     in_path, out_path, wave, key, earliest_date, latest_date, demographic_titles, label_maps, title_start, group_type
 ):
     for col in cols:
-        title = f"{title_start} in Priority Group {wave} ({wave_column_headings[group_type][str(wave)]})\nby {demographic_titles[col]}"
+        title = f"{title_start} in '{wave_column_headings[group_type][str(wave)]}' group\nby {demographic_titles[col]}"
         labels = label_maps[col]
         uptake = load_uptake(
             f"{in_path}/group_{wave}_{key}_by_{col}.csv", earliest_date, latest_date
@@ -390,7 +390,7 @@ def generate_stacked_charts_for_all(
     # calculate the proportion with no vaccine for other reasons
     uptake_pc["No Vaccine with Reason"] = 100 - uptake_pc.sum(axis=1)
     # reorder columns
-    uptake_pc = uptake_pc[["First dose","Declined", "No Vaccine with Reason", "No Vaccine-Related Record"]]
+    uptake_pc = uptake_pc[["Vaccinated","Declined", "No Vaccine with Reason", "No Vaccine-Related Record"]]
     
     plot_stacked_chart(
         uptake_pc, title, f"{out_path}/all_vaccinated_declined_by_group{group_type}.png"
@@ -431,7 +431,7 @@ def generate_stacked_charts_for_wave(
         # calculate the proportion with no vaccine for other reasons
         uptake_pc["No vaccine with reason"] = 100 - uptake_pc.sum(axis=1)
         # reorder columns
-        uptake_pc = uptake_pc[["First dose","Declined", "No vaccine with reason", "No Vaccine-Related Record"]]
+        uptake_pc = uptake_pc[["Vaccinated","Declined", "No vaccine with reason", "No Vaccine-Related Record"]]
 
         plot_stacked_chart(
             uptake_pc, title, f"{out_path}/wave{group_type}_{wave}_{key}_{col}.png"
@@ -460,7 +460,7 @@ def generate_report_for_wave(
 
     subtitle = subtitles[key]
 
-    subtitle = f"{subtitle} / Priority Group {wave} ({wave_column_headings[''][str(wave)]}"
+    subtitle = f"{subtitle} / '{wave_column_headings[''][str(wave)]}' group"
     
 
     try:
@@ -510,7 +510,7 @@ def get_label_maps():
     for a in age_bands:
         lower = str(age_bands[a][0]).replace("None","0")
         upper = str(age_bands[a][1]).replace("None","+")
-        age_band_labels[a] = lower +"-"+ upper
+        age_band_labels[str(a)] = lower +"-"+ upper
 
     labels = {
         "sex": {"F": "Female", "M": "Male"},
