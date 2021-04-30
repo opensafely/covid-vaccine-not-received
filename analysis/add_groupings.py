@@ -5,11 +5,11 @@ def add_groupings(df):
     # Patients with a vaccination
     df["vacc_group"] = df["vacc1_dat"].notnull() | df["vacc2_dat"].notnull()
 
-    # Patients with a decline (but no vaccination)
-    df["decline_group"] = df["decl_dat"].notnull() & df["vacc1_dat"].isnull() & df["vacc2_dat"].isnull()
+    # Patients with a decline (but no vaccination - already incorporated in decl_date)
+    df["decline_group"] = df["decl_dat"].notnull()
 
     # Patients with a decline (irrespective of vaccination status)
-    df["decline_total_group"] = df["decl_dat"].notnull()
+    df["decline_total_group"] = df["cov1decl_dat"].notnull() | df["cov2decl_dat"].notnull()
 
     # Patients with a decline and a later vaccination
     # check that declined date is within the vaccination campaign period not in the past

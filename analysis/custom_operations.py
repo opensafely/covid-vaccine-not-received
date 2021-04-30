@@ -56,18 +56,22 @@ def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
     base_path = f"{output_dir}/{backend}/coverage_to_date"
     cohort = pd.read_pickle(input_path)
 
+    # limit to priority groups (ages 50+ and clinical priority groups)
+    cohort = cohort.loc[cohort["wave"]!=0]
+
     practice_figures = cohort[["practice", "vacc_group", "decline_group", "patient_id"]]\
                         .groupby("practice").agg({"vacc_group":"sum", 
                                                   "decline_group":"sum", 
                                                   "patient_id":"nunique"})
     practice_figures = practice_figures.rename(columns={"patient_id":"patient_count"})
     
-    # remove tiny practices and ensure that at least one patient has been vaccinated in each practice
+    # remove tiny practices by setting a minimum no of people in the priority groups
+    #  and ensure that at least 10 patients have been vaccinated in each practice
     if backend=="expectations":
         practice_figures = practice_figures.loc[(practice_figures["patient_count"]>10)&(practice_figures["vacc_group"]>0)]
         
     else:
-        practice_figures = practice_figures.loc[(practice_figures["patient_count"]>500)&(practice_figures["vacc_group"]>10)]
+        practice_figures = practice_figures.loc[(practice_figures["patient_count"]>250)&(practice_figures["vacc_group"]>10)]
     
     # summarise data
     practice_count = len(practice_figures.index)
@@ -121,7 +125,7 @@ def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
                 axs[n].scatter(out1["patient_count"]/1000, out1[x], alpha=0.5, marker='s', color='b')
                 axs[n].scatter(out2["patient_count"]/1000, out2[x], alpha=0.5, marker='o', color='b')
                 if "per_1000_vacc" in x:
-                    title = "COVID Vaccines Declined\n per 1000 vaccinated patients per practice"
+                    title = "COVID Vaccines Declined\n per 1000 vaccinated patients in priority groups per practice"
                     ylabel = "Rate per 1000"
                 else:
                     title = "COVID Vaccines Declined\n per practice"

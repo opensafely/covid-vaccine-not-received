@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import FixedFormatter, PercentFormatter
 from matplotlib.dates import TU, WeekdayLocator
 import pandas as pd
+import numpy as np
 
 from compute_uptake_for_paper import cols, demographic_cols, other_cols
 from ethnicities import ethnicities, high_level_ethnicities
@@ -33,7 +34,7 @@ wave_column_headings = {"":
     "2":
         {"total": "All",
         "all_priority": "Priority groups",
-        "1": "65+ / in care home",
+        "1": "65+",
         "2": "CEV / At Risk",
         "3": "50-64",
         "0": "Other"},
@@ -510,7 +511,7 @@ def get_label_maps():
     for a in age_bands:
         lower = str(age_bands[a][0]).replace("None","0")
         upper = str(age_bands[a][1]).replace("None","+")
-        age_band_labels[str(a)] = lower +"-"+ upper
+        age_band_labels[str(a)] = lower +"-<"+ upper
 
     labels = {
         "sex": {"F": "Female", "M": "Male"},
@@ -543,17 +544,20 @@ def plot_chart(
     cohort_average=None,
     is_percent=True
 ):
+    df = df.loc['2020-12-08':]
     df.index = pd.to_datetime(df.index)
     ax = plt.gca()
 
     df.plot(ax=ax)
     ax.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0)
+    ax.minorticks_off()
 
     ax.set_title(title)
 
     # Add x-axis ticks for each Tuesday (the day that vaccines were first made
     # available.)
     week_days = df.loc[df.index.dayofweek == TU.weekday]
+ 
     tick_labels = [
         d.strftime("%d %b %Y")
         if ix == 0 or d.month == 1 and d.day <= 7
@@ -564,6 +568,10 @@ def plot_chart(
     ax.xaxis.set_major_formatter(FixedFormatter(tick_labels))
     ax.xaxis.set_tick_params(rotation=90)
 
+    # ensure final tick label is included and shift position of xticks
+    locs = ax.get_xticks()
+    locs = np.append(locs, locs[-1]+7)
+    ax.set_xticks([l-4 for l in locs])
     ax.set_ylim(ymin=0)
 
     if is_percent:
@@ -576,7 +584,7 @@ def plot_chart(
 
     if cohort_average is not None:
         ax.axhline(cohort_average, color="k", linestyle="--", alpha=0.5)
-        ax.text(df.index[0], cohort_average * 1.02, "latest overall cohort rate")
+        ax.text(df.index[1], cohort_average * 1.02, "latest overall cohort rate")
 
     plt.savefig(out_path, dpi=300, bbox_inches="tight")
     plt.close()
