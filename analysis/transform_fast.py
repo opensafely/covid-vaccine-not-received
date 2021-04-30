@@ -197,7 +197,7 @@ def add_vacc_dates(cohort):
 def add_vacc_decline_dates(cohort):
     """Record decline only if patient has had no vaccine recorded.
     """
-    cohort["decl_dat"] = cohort["cov1decl_dat", "cov2decl_dat"].min(axis=1)
+    cohort["decl_dat"] = cohort[["cov1decl_dat", "cov2decl_dat"]].min(axis=1)
 
     # first vaccine date
     s = cohort["decl_dat"]
