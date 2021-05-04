@@ -281,6 +281,7 @@ def generate_summary_table_for_wave(
             f"{in_path}/group_{wave}_{key}_by_{col}.csv", earliest_date, latest_date
         )
 
+        # move to the next item if only one column with data
         if len(uptake.columns)==1:
             continue
 
@@ -425,25 +426,39 @@ def generate_stacked_charts_for_wave(
             
             # combine keys (e.g. vaccinated, declined etc)
             uptake_by_dem = uptake_by_dem.append(uptake)
-
+        uptake_by_dem = uptake_by_dem.drop(0, axis=1)
         uptake_pc = compute_uptake_percent(uptake_by_dem, labels)
         uptake_pc = uptake_pc.rename(index=subtitles, columns=subtitles)
-        uptake_pc = uptake_pc.transpose().drop(0)
-
+        uptake_pc = uptake_pc.transpose()
+        
+        
         # calculate the proportion with no vaccine for other reasons
         uptake_pc["Inappropriate/unsuccessful"] = 100 - uptake_pc.sum(axis=1)
         # reorder columns
         uptake_pc = uptake_pc[["Vaccinated","Declined", "Inappropriate/unsuccessful", "Unreached"]]
-
+        
         plot_stacked_chart(
             uptake_pc, title, f"{out_path}/wave{group_type}_{wave}_{key}_{col}.png"
         )
+        
+        # also merge counts and percents to export to csv
+        uptake_by_dem = uptake_by_dem.transpose().rename(index=labels, columns=subtitles)
+        uptake_by_dem["Inappropriate/unsuccessful"] = uptake_by_dem["total"] - uptake_by_dem["Vaccinated"] - uptake_by_dem["Unreached"] - uptake_by_dem["Declined"]
+        uptake_pc = uptake_pc.add_suffix("_percent")
+        uptake_by_dem = uptake_by_dem[["total","Vaccinated", "Declined", "Inappropriate/unsuccessful", "Unreached"]]  
+        uptake_by_dem = pd.concat([uptake_by_dem, uptake_pc], axis=1)
+        uptake_by_dem.to_csv(f"{base_path}/tables/wave{group_type}_{wave}_{key}_{col}.csv")
 
             
 def compute_uptake_percent(uptake, labels):
     uptake_pc = 100 * uptake / uptake.loc["total"]
     uptake_pc.drop("total", inplace=True)
     uptake_pc.fillna(0, inplace=True)
+    if '65-<70' in labels.values():
+        # Fixed ascending sort order for age bands
+        ordered_cols = [k for k in labels.keys() if k in uptake_pc.columns]
+        uptake_pc = uptake_pc[ordered_cols]
+        print(uptake_pc.columns)
     if set(uptake_pc.columns) == {"True", "False"}:
         # This ensures that chart series are always same colour.
         uptake_pc = uptake_pc[["True", "False"]]
