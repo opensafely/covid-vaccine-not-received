@@ -220,7 +220,9 @@ def add_waves(cohort):
     # Wave 1: Residents in Care Homes
     # (The spec includes staff in care homes, but occupation codes are not well
     # recorded)
-    s.mask(cohort["longres_dat"].notnull(), 1, inplace=True)
+    s.mask(
+        (cohort["longres_dat"].notnull()) & (cohort["age"] >= 65), 1, inplace=True
+    )
 
     # Wave 2: Age 80 or over
     # (This spec includes frontline H&SC workers, but see above.)

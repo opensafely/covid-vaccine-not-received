@@ -40,7 +40,7 @@ def run(input_path="output/cohort.pickle", output_dir="output"):
 
         # Compute uptake by broader waves (1-3)
         uptake_w2 = compute_uptake(cohort, event_col, "wave2")
-        uptake.to_csv(f"{dir_path}/all_{key}_by_group2.csv")
+        uptake_w2.to_csv(f"{dir_path}/all_{key}_by_group2.csv")
 
         # for "any vaccine record" calculate the inverse ie. no of patients with NO vaccine related record
         if event_col == "vacc_any_record_dat":
