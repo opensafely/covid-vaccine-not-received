@@ -1,5 +1,4 @@
 from generate_paper_outputs import run
-from custom_operations import practice_variation, declined_vaccinated
 import os
 
 backend = os.getenv("OPENSAFELY_BACKEND", "expectations")
@@ -11,8 +10,3 @@ end_date = "2021-04-14"
 run(base_path, start_date, end_date)
 
 
-# create practice charts
-practice_variation()
-
-# create summary chart of patients declining then accepting vaccines, by priority group
-declined_vaccinated()

@@ -40,10 +40,18 @@ actions:
         cohort: output/*/cumulative_coverage/*/*/*.csv
 
   generate_outputs:
-    run: python:latest python analysis/generate_all_charts_and_tables.py
+    run: python:latest python analysis/run_charts_and_tables.py
     needs: [transform, compute_uptake_for_paper]
     outputs:
       moderately_sensitive:
         charts: output/*/charts/*.png
         #reports: output/*/reports/*.html
         tables: output/*/tables/*.csv
+
+  generate_additional_outputs:
+    run: python:latest python analysis/run_additional_charts.py
+    needs: [transform]
+    outputs:
+      moderately_sensitive:
+        additional_charts: output/*/additional_figures/*.png
+        prac_table: output/*/additional_figures/practice_decline_summary.csv

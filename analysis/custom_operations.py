@@ -31,6 +31,10 @@ group_names = {
     "patient_id":"total"
     }
 
+backend = os.getenv("OPENSAFELY_BACKEND", "expectations")
+out_path = f"output/{backend}/additional_figures"
+os.makedirs(out_path, exist_ok=True)
+
 def compute_uptake_percent(uptake):#, labels):
     uptake_pc = 100 * uptake / uptake.loc["total"]
     uptake_pc.drop("total", inplace=True)
@@ -47,13 +51,10 @@ def compute_uptake_percent(uptake):#, labels):
     return uptake_pc
 
 
-def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
+def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
     ''' Calculates total patients per practice and of whom how many have had a vaccine to date, or declined
     Note: those declining only include those who have not later received a vaccine.
     '''
-    backend = os.getenv("OPENSAFELY_BACKEND", "expectations")
-
-    base_path = f"{output_dir}/{backend}/coverage_to_date"
     cohort = pd.read_pickle(input_path)
 
     # limit to priority groups (ages 50+ and clinical priority groups)
@@ -78,7 +79,7 @@ def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
     counts = practice_figures.loc[practice_figures["decline_group"]>0]["decline_group"].count()
     d = {"practices with declines":counts, "total practices":practice_count}
     out = pd.Series(d, index=["practices with declines", "total practices"])
-    out.to_csv(f"{output_dir}/{backend}/tables/practice_decline_summary.csv")
+    out.to_csv(f"{output_dir}/practice_decline_summary.csv")
 
     practice_figures = practice_figures.assign(
         decline_per_1000 = 1000*practice_figures["decline_group"]/practice_figures["patient_count"],
@@ -135,16 +136,15 @@ def practice_variation(input_path="output/cohort.pickle", output_dir="output"):
             axs[1].set_xlabel("Practice population (thousands)")
             
 
-        fig.savefig(f"output/{backend}/charts/declines_by_practice_{plot_type}.png")
+        fig.savefig(f"{output_dir}/declines_by_practice_{plot_type}.png")
 
 
 
-def declined_vaccinated(input_path="output/cohort.pickle", output_dir="output", wave_column_headings=wave_column_headings):
+def declined_vaccinated(input_path="output/cohort.pickle", output_dir=out_path):
     ''' Counts patients who went from "Declined" to "Vaccinated".
         Creates a chart. 
     '''
-    backend = os.getenv("OPENSAFELY_BACKEND", "expectations")
-    base_path = f"{output_dir}/{backend}/coverage_to_date"
+
     cohort = pd.read_pickle(input_path)
 
     cohort["wave"] = cohort["wave"].astype(str)
@@ -176,14 +176,14 @@ def declined_vaccinated(input_path="output/cohort.pickle", output_dir="output", 
 
     axs[1].set_xlabel("Priority group")
 
-    fig.savefig(f"output/{backend}/charts/all_declined_then_accepted_by_wave.png")
+    fig.savefig(f"{output_dir}/all_declined_then_accepted_by_wave.png")
 
 
 
 def invert_df(df, group="all"):
     ''' "Inverts" df: 
     calculates the difference between the total population ("total" row) and 
-    each other row in turn, so if df counts "patients vaccinated", the resulting
+    each other row in turn, so if `df` counts "patients vaccinated", the resulting
     df counts "patients NOT vaccinated".
     '''
     for i in df.index.drop("total"):
