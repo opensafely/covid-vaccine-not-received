@@ -87,7 +87,7 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
         vacc_per_1000 = 1000*practice_figures["vacc_group"]/practice_figures["patient_count"]
     )
 
-    for plot_type in ["hist","scatter"]:
+    for plot_type in ["hist","boxplot"]:
         if plot_type=="hist":
             out = practice_figures.copy()
             fig, axs = plt.subplots(1, 2, sharey=True, tight_layout=True)
@@ -110,21 +110,29 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
                 title = "COVID Vaccines "+ x.replace("_"," ").replace("decline", "declined\n").replace("vacc","vaccinated").title()+" Patients"
                 axs[n].set_title(title)
 
-        if plot_type=="scatter":
+        if plot_type=="boxplot":
             out = practice_figures.copy()
             # ensure that at least 1% of people in each practice have been vaccinated
-            # (those with a v young population e.g. military may have small numbers)
+            # (those with a v young population e.g. student/military may have small numbers)
             out = out.loc[out["vacc_per_1000"]>10]
-            
-            # group very large practices together to avoid identifiability
-            out1 = out.loc[out["patient_count"]>=25_000]
-            out1["patient_count"]= np.where(out1["patient_count"]>35_000, 35_000, 30_000)
-            out2 = out.loc[out["patient_count"]<25_000]
-            
+            if backend=="expectations":
+                bins = [0, 10, 20, 100]
+                labels = [str(a)+"-<"+str(b) for (a,b) in zip(bins[:-1], bins[1:])]
+            else:
+                bins = [0, 2_000, 5_000, 10_000, 15_000, 20_000, 25_000, 35_000, 100_000]
+                labels = [str(int(a/1000))+"k-<"+str(int(b/100))+"k" for (a,b) in zip(bins[:-1], bins[1:])]
+            out["prac_size"] = pd.cut(out["patient_count"], bins=bins, labels=labels, retbins=False, include_lowest=True, right=False)
+            out = out.set_index("prac_size")
+
             fig, axs = plt.subplots(2, 1, sharex=True, tight_layout=True, figsize=(6,8))
             for n, x in enumerate(["decline_group", "decline_per_1000_vacc"]):
-                axs[n].scatter(out1["patient_count"]/1000, out1[x], alpha=0.5, marker='s', color='b')
-                axs[n].scatter(out2["patient_count"]/1000, out2[x], alpha=0.5, marker='o', color='b')
+                plotting = out[x]
+                plotting_dict = {}
+                for l in plotting.index.unique():
+                    # create a list of values for each practice size group
+                    temp = plotting.loc[l].to_list()
+                    plotting_dict[l] = temp
+                axs[n].boxplot(list(plotting_dict.values()))
                 if "per_1000_vacc" in x:
                     title = "COVID Vaccines Declined\n per 1000 vaccinated patients in priority groups per practice"
                     ylabel = "Rate per 1000"
@@ -133,7 +141,9 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
                     ylabel = "Vaccines Declined"
                 axs[n].set_ylabel(ylabel)
                 axs[n].set_title(title)
-            axs[1].set_xlabel("Practice population (thousands)")
+            ticks = axs[n].get_xticks()
+            plt.xticks(ticks, list(plotting.index.unique()))
+            axs[1].set_xlabel("Practice population size")
             
 
         fig.savefig(f"{output_dir}/declines_by_practice_{plot_type}.png")
