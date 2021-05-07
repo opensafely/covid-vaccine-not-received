@@ -121,8 +121,8 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
                 bins = [0, 10, 15, 20, 25, 100]
                 labels = [str(a)+"-<"+str(b) for (a,b) in zip(bins[:-1], bins[1:])]
             else:
-                bins = [0, 1_000, 2_500, 5_000, 7_500, 10_000, 15_000, 100_000]
-                labels = [str(int(a/1000))+"k-<"+str(int(b/1000))+"k" for (a,b) in zip(bins[:-1], bins[1:])]
+                bins = [0, 1_500, 2_000, 2_500, 3_000, 4_000, 5_000, 7_500, 10_000, 100_000]
+                labels = [str(round(a/1000,1))+"k-<"+str(round(b/1000,1))+"k" for (a,b) in zip(bins[:-1], bins[1:])]
             out["prac_size"] = pd.cut(out["patient_count"], bins=bins, labels=labels, retbins=False, include_lowest=True, right=False)
             
 
@@ -162,8 +162,8 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
                     _, edges = pd.cut(out[x], bins=bins[n], retbins=True)
                     edges = [round(x,1) for x in edges]
                 else:
-                    bins[0] = [0, 25, 50, 75, 100, 200, 500, 2000]
-                    bins[1] = [0, 10, 20, 30, 40, 50, 75, 100, 150, 1000]
+                    bins[0] = [0, 20, 40, 60, 80, 100, 200, 500, 2000]
+                    bins[1] = [0, 5, 10, 20, 30, 40, 50, 75, 100, 150, 1000]
                     _, edges = pd.cut(out[x], bins=bins[n], retbins=True)
                     edges = [int(x) for x in edges]
 
