@@ -121,8 +121,8 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
                 bins = [0, 10, 15, 20, 25, 100]
                 labels = [str(a)+"-<"+str(b) for (a,b) in zip(bins[:-1], bins[1:])]
             else:
-                bins = [0, 1_000, 2_500, 5_000, 7_500, 10_000, 15_000, 20_000, 100_000]
-                labels = [str(int(a/1000))+"k-<"+str(int(b/100))+"k" for (a,b) in zip(bins[:-1], bins[1:])]
+                bins = [0, 1_000, 2_500, 5_000, 7_500, 10_000, 15_000, 100_000]
+                labels = [str(int(a/1000))+"k-<"+str(int(b/1000))+"k" for (a,b) in zip(bins[:-1], bins[1:])]
             out["prac_size"] = pd.cut(out["patient_count"], bins=bins, labels=labels, retbins=False, include_lowest=True, right=False)
             
 
@@ -139,7 +139,7 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
                         plotting_dict[l] = temp
                     axs[n].boxplot(list(plotting_dict.values()))
                     if "per_1000_vacc" in x:
-                        title = "COVID Vaccines Declined\n per 1000 vaccinated patients in priority groups per practice"
+                        title = "COVID Vaccines Declined per 1000 vaccinated patients\n in priority groups per practice"
                         ylabel = "Rate per 1000"
                     else:
                         title = "COVID Vaccines Declined\n per practice"
@@ -147,7 +147,7 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
                     axs[n].set_ylabel(ylabel)
                     axs[n].set_title(title)
                 ticks = axs[n].get_xticks()
-                plt.xticks(ticks, list(plotting.index.unique()))
+                plt.xticks(ticks, list(plotting.index.unique()), rotation=90)
                 axs[1].set_xlabel("Practice population size")
             
 
@@ -155,30 +155,46 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
             
             fig, axs = plt.subplots(2, 1, sharex=True, tight_layout=True, figsize=(6,8))
             for n, x in enumerate(["decline_group", "decline_per_1000_vacc"]):
-                _, edges = pd.cut(out[x], bins=20, retbins=True)
+                bins = {}
                 if backend=="expectations":
+                    bins[0] = [0, 2, 4, 6, 8, 20]
+                    bins[1] = bins[0]
+                    _, edges = pd.cut(out[x], bins=bins[n], retbins=True)
                     edges = [round(x,1) for x in edges]
                 else:
+                    bins[0] = [0, 25, 50, 75, 100, 200, 500, 2000]
+                    bins[1] = [0, 10, 20, 30, 40, 50, 75, 100, 150, 1000]
+                    _, edges = pd.cut(out[x], bins=bins[n], retbins=True)
                     edges = [int(x) for x in edges]
 
-                out[f"{x}_binned"] = pd.cut(out[x], bins=20, labels=edges[:-1], retbins=False, include_lowest=True)
+                out[f"{x}_binned"] = pd.cut(out[x], bins=bins[n], labels=edges[:-1], retbins=False, include_lowest=True)
 
                 plotting = out.groupby([f"{x}_binned","prac_size"])[["patient_count"]].count().unstack()
                 plotting.columns = plotting.columns.droplevel()
 
                 # plot heat map
-                axs[n].imshow(plotting, cmap='hot', interpolation='nearest')
+                im = axs[n].imshow(plotting, cmap='hot', interpolation='nearest')
+
+                # Create colorbar
+                fig.colorbar(im, ax=axs[n])
+                #cbar.ax.set_ylabel("no of practices", ax=axs[n], rotation=-90, va="bottom")
+
                 if "per_1000" in x:
-                    title = "COVID Vaccines Declined\n per 1000 vaccinated patients in priority groups per practice"
+                    title = "COVID Vaccines recorded as Declined\n per 1000 vaccinated patients in priority groups per practice"
                     ylabel = "Rate per 1000"
                 else:
-                    title = "COVID Vaccines Declined\n per practice"
+                    title = "COVID Vaccines recorded as Declined\n per practice"
                     ylabel = "Vaccines Declined"
+
                 axs[n].set_ylabel(ylabel)
                 axs[n].set_title(title)
                 # We want to show all ticks...
+                yticks = np.arange(len(plotting.index))
+                # (adjust location of yticks to bottom of each category)
+                yticks = [k-yticks[1]/2 for k in yticks]
                 axs[n].set_xticks(np.arange(len(plotting.columns)))
-                axs[n].set_yticks(np.arange(len(plotting.index)))
+                axs[n].set_yticks(yticks)
+                print(axs[n].get_yticks())
                 # ... and label them with the respective list entries
                 axs[n].set_xticklabels(plotting.columns, rotation=90)
                 axs[n].set_yticklabels(plotting.index)  
