@@ -121,7 +121,7 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
                 bins = [0, 10, 15, 20, 25, 100]
                 labels = [str(a)+"-<"+str(b) for (a,b) in zip(bins[:-1], bins[1:])]
             else:
-                bins = [0, 1_500, 2_000, 2_500, 3_000, 4_000, 5_000, 7_500, 10_000, 100_000]
+                bins = [0, 1_500, 2_000, 2_500, 3_000, 4_000, 5_000, 6_000, 7_000, 10_000, 100_000]
                 labels = [str(round(a/1000,1))+"k-<"+str(round(b/1000,1))+"k" for (a,b) in zip(bins[:-1], bins[1:])]
             out["prac_size"] = pd.cut(out["patient_count"], bins=bins, labels=labels, retbins=False, include_lowest=True, right=False)
             
@@ -153,17 +153,17 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
 
         if plot_type=="heatmap":
             
-            fig, axs = plt.subplots(2, 1, sharex=True, tight_layout=True, figsize=(6,8))
+            fig, axs = plt.subplots(2, 1, tight_layout=True, figsize=(6,8))
             for n, x in enumerate(["decline_group", "decline_per_1000_vacc"]):
                 bins = {}
                 if backend=="expectations":
                     bins[0] = [0, 2, 4, 6, 8, 20]
-                    bins[1] = bins[0]
+                    bins[1] = [0, 1, 2, 3, 4]
                     _, edges = pd.cut(out[x], bins=bins[n], retbins=True)
                     edges = [round(x,1) for x in edges]
                 else:
-                    bins[0] = [0, 20, 40, 60, 80, 100, 200, 500, 2000]
-                    bins[1] = [0, 5, 10, 20, 30, 40, 50, 75, 100, 150, 1000]
+                    bins[0] = [0, 20, 40, 60, 80, 100, 120, 140, 160, 2000]
+                    bins[1] = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 1000]
                     _, edges = pd.cut(out[x], bins=bins[n], retbins=True)
                     edges = [int(x) for x in edges]
 
@@ -173,14 +173,14 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
                 plotting.columns = plotting.columns.droplevel()
 
                 # plot heat map
-                im = axs[n].imshow(plotting, cmap='hot', interpolation='nearest')
+                im = axs[n].imshow(plotting, cmap='RdPu', interpolation='nearest')
 
                 # Create colorbar
                 fig.colorbar(im, ax=axs[n])
                 #cbar.ax.set_ylabel("no of practices", ax=axs[n], rotation=-90, va="bottom")
 
                 if "per_1000" in x:
-                    title = "COVID Vaccines recorded as Declined\n per 1000 vaccinated patients in priority groups per practice"
+                    title = "COVID Vaccines recorded as Declined\n per 1000 vaccinated patients in priority groups\n per practice"
                     ylabel = "Rate per 1000"
                 else:
                     title = "COVID Vaccines recorded as Declined\n per practice"
@@ -194,7 +194,6 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
                 yticks = [k-yticks[1]/2 for k in yticks]
                 axs[n].set_xticks(np.arange(len(plotting.columns)))
                 axs[n].set_yticks(yticks)
-                print(axs[n].get_yticks())
                 # ... and label them with the respective list entries
                 axs[n].set_xticklabels(plotting.columns, rotation=90)
                 axs[n].set_yticklabels(plotting.index)  
