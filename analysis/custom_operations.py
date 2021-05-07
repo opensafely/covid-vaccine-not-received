@@ -115,11 +115,13 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
             # ensure that at least 1% of people in each practice have been vaccinated
             # (those with a v young population e.g. student/military may have small numbers)
             out = out.loc[out["vacc_per_1000"]>10]
+
+            # convert practice list sizes to bins
             if backend=="expectations":
-                bins = [0, 10, 20, 100]
+                bins = [0, 10, 15, 20, 25, 100]
                 labels = [str(a)+"-<"+str(b) for (a,b) in zip(bins[:-1], bins[1:])]
             else:
-                bins = [0, 2_000, 5_000, 10_000, 15_000, 20_000, 25_000, 35_000, 100_000]
+                bins = [0, 1_000, 2_500, 5_000, 7_500, 10_000, 15_000, 20_000, 100_000]
                 labels = [str(int(a/1000))+"k-<"+str(int(b/100))+"k" for (a,b) in zip(bins[:-1], bins[1:])]
             out["prac_size"] = pd.cut(out["patient_count"], bins=bins, labels=labels, retbins=False, include_lowest=True, right=False)
             
@@ -154,7 +156,10 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
             fig, axs = plt.subplots(2, 1, sharex=True, tight_layout=True, figsize=(6,8))
             for n, x in enumerate(["decline_group", "decline_per_1000_vacc"]):
                 _, edges = pd.cut(out[x], bins=20, retbins=True)
-                edges = [int(x) for x in edges]
+                if backend=="expectations":
+                    edges = [round(x,1) for x in edges]
+                else:
+                    edges = [int(x) for x in edges]
 
                 out[f"{x}_binned"] = pd.cut(out[x], bins=20, labels=edges[:-1], retbins=False, include_lowest=True)
 
