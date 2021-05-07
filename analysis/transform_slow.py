@@ -38,7 +38,6 @@ def transform(reader):
             "high_level_ethnicity": "int8",
         }
         cohort = pd.read_csv(f.name, parse_dates=date_fieldnames, dtype=dtypes)
-    print(cohort.columns)
     return cohort[necessary_cols]
 
 
@@ -57,6 +56,7 @@ def transform_rows(rows):
         add_missing_vacc_columns(row)
         replace_unknown_dates(row)
         add_vacc_dates(row)
+        add_earliest_decline_dates(row)
         add_vacc_decline_dates(row)
         add_vacc_any_record_dates(row)
         add_age_bands(row, range(1, 12 + 1))
@@ -163,7 +163,7 @@ def replace_unknown_dates(row):
     """Where an event date was unknown (1900-01-01) or obviously incorrect (prior to vaccination campaign),
     replace with "2020-11-28". 
     """
-    for col in ["cov1decl_dat", "cov2decl_dat", "cov2not_dat"]:
+    for col in ["cov1decl_dat", "cov2decl_dat", "covdecl_imms_dat", "covnot_dat", "covnot_imms_dat"]:
         if row[col] < "2020-11-29":
             row[col] = "2020-11-28" #datetime(2020,11,28)
 
@@ -177,20 +177,28 @@ def add_vacc_dates(row):
     for ix in 1, 2:
         covadm_dat = row[f"covadm{ix}_dat"]
         covrx_dat = row[f"covrx{ix}_dat"]
+        covsnomed_dat = row["covsnomed_dat"]
         vacc_dat_fn = f"vacc{ix}_dat"
+        
 
-        if covadm_dat and covrx_dat:
-            row[vacc_dat_fn] = min(covadm_dat, covrx_dat)
+        if covadm_dat and (covrx_dat or covsnomed_dat):
+            row[vacc_dat_fn] = min(covadm_dat, covrx_dat, covsnomed_dat)
         elif covadm_dat:
             row[vacc_dat_fn] = covadm_dat
         else:
             row[vacc_dat_fn] = covrx_dat
 
+def add_earliest_decline_dates(row):
+    """Record earliest date of a decline (irrespective of vaccination status).
+    """
+    
+    row["decl_first_dat"] = min(row["cov1decl_dat"], row["cov2decl_dat"], row["covdecl_imms_dat"])
+
 
 def add_vacc_decline_dates(row):
     """Record decline only if patient has had no vaccine recorded.
     """
-    row["decl_dat"] = min(row["cov1decl_dat"], row["cov2decl_dat"])
+    row["decl_dat"] = row["decl_first_dat"]
 
     # Replace declined date with null if a vaccine has been recorded
     if row["vacc1_dat"]:
@@ -203,7 +211,8 @@ def add_vacc_any_record_dates(row):
     """
     row["vacc_any_record_dat"] = min(row["vacc1_dat"], 
                                     row["vacc2_dat"], 
-                                    row["cov2not_dat"],
+                                    row["covnot_dat"],
+                                    row["covnot_imms_dat"],
                                     row["decl_dat"])
 
 

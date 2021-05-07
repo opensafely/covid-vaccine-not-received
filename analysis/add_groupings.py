@@ -9,20 +9,21 @@ def add_groupings(df):
     df["decline_group"] = df["decl_dat"].notnull()
 
     # Patients with a decline (irrespective of vaccination status)
-    df["decline_total_group"] = df["cov1decl_dat"].notnull() | df["cov2decl_dat"].notnull()
+    df["decline_total_group"] = df["decl_first_dat"].notnull() 
 
     # Patients with a decline and a later vaccination
     # check that declined date is within the vaccination campaign period not in the past
     # (otherwise exclude, as unable determine correct sequence of events)
-    df["declined_accepted_group"] =  gt(df["vacc1_dat"], df["cov1decl_dat"]) & (
-                                     df["cov1decl_dat"] >= "2020-12-08") & (
+    df["declined_accepted_group"] =  gt(df["vacc1_dat"], df["decl_first_dat"]) & (
+                                     df["decl_first_dat"] >= "2020-12-08") & (
                                      df["vacc1_dat"] >= "2020-12-08"
                                      )
 
     # Patients with any other record related to vaccination (and no vaccination or decline)
     ## indicates an attempt or intention to vaccinate but 
     ## (apparently) unsuccessful for reasons other than declining
-    df["other_reason_group"] = df["cov2not_dat"].notnull() & df["vacc1_dat"].isnull() & df["decl_dat"].isnull()
+    df["other_reason_group"] = (df["covnot_dat"].notnull() | df["covnot_imms_dat"].notnull()) & (
+                                df["vacc1_dat"].isnull()) & (df["decl_dat"].isnull())
 
     # Patients with Immunosuppression
     #
