@@ -87,7 +87,7 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
         vacc_per_1000 = 1000*practice_figures["vacc_group"]/practice_figures["patient_count"]
     )
 
-    for plot_type in ["hist","boxplot"]:
+    for plot_type in ["hist","boxplot", "heatmap"]:
         if plot_type=="hist":
             out = practice_figures.copy()
             fig, axs = plt.subplots(1, 2, sharey=True, tight_layout=True)
@@ -110,7 +110,7 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
                 title = "COVID Vaccines "+ x.replace("_"," ").replace("decline", "declined\n").replace("vacc","vaccinated").title()+" Patients"
                 axs[n].set_title(title)
 
-        if plot_type=="boxplot":
+        if (plot_type=="boxplot") | (plot_type=="heatmap"):
             out = practice_figures.copy()
             # ensure that at least 1% of people in each practice have been vaccinated
             # (those with a v young population e.g. student/military may have small numbers)
@@ -122,18 +122,48 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
                 bins = [0, 2_000, 5_000, 10_000, 15_000, 20_000, 25_000, 35_000, 100_000]
                 labels = [str(int(a/1000))+"k-<"+str(int(b/100))+"k" for (a,b) in zip(bins[:-1], bins[1:])]
             out["prac_size"] = pd.cut(out["patient_count"], bins=bins, labels=labels, retbins=False, include_lowest=True, right=False)
-            out = out.set_index("prac_size")
+            
 
+            if (plot_type=="boxplot"):
+                out = out.set_index("prac_size")
+
+                fig, axs = plt.subplots(2, 1, sharex=True, tight_layout=True, figsize=(6,8))
+                for n, x in enumerate(["decline_group", "decline_per_1000_vacc"]):
+                    plotting = out[x]
+                    plotting_dict = {}
+                    for l in plotting.index.unique():
+                        # create a list of values for each practice size group
+                        temp = plotting.loc[l].to_list()
+                        plotting_dict[l] = temp
+                    axs[n].boxplot(list(plotting_dict.values()))
+                    if "per_1000_vacc" in x:
+                        title = "COVID Vaccines Declined\n per 1000 vaccinated patients in priority groups per practice"
+                        ylabel = "Rate per 1000"
+                    else:
+                        title = "COVID Vaccines Declined\n per practice"
+                        ylabel = "Vaccines Declined"
+                    axs[n].set_ylabel(ylabel)
+                    axs[n].set_title(title)
+                ticks = axs[n].get_xticks()
+                plt.xticks(ticks, list(plotting.index.unique()))
+                axs[1].set_xlabel("Practice population size")
+            
+
+        if plot_type=="heatmap":
+            
             fig, axs = plt.subplots(2, 1, sharex=True, tight_layout=True, figsize=(6,8))
             for n, x in enumerate(["decline_group", "decline_per_1000_vacc"]):
-                plotting = out[x]
-                plotting_dict = {}
-                for l in plotting.index.unique():
-                    # create a list of values for each practice size group
-                    temp = plotting.loc[l].to_list()
-                    plotting_dict[l] = temp
-                axs[n].boxplot(list(plotting_dict.values()))
-                if "per_1000_vacc" in x:
+                _, edges = pd.cut(out[x], bins=20, retbins=True)
+                edges = [int(x) for x in edges]
+
+                out[f"{x}_binned"] = pd.cut(out[x], bins=20, labels=edges[:-1], retbins=False, include_lowest=True)
+
+                plotting = out.groupby([f"{x}_binned","prac_size"])[["patient_count"]].count().unstack()
+                plotting.columns = plotting.columns.droplevel()
+
+                # plot heat map
+                axs[n].imshow(plotting, cmap='hot', interpolation='nearest')
+                if "per_1000" in x:
                     title = "COVID Vaccines Declined\n per 1000 vaccinated patients in priority groups per practice"
                     ylabel = "Rate per 1000"
                 else:
@@ -141,10 +171,14 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
                     ylabel = "Vaccines Declined"
                 axs[n].set_ylabel(ylabel)
                 axs[n].set_title(title)
-            ticks = axs[n].get_xticks()
-            plt.xticks(ticks, list(plotting.index.unique()))
+                # We want to show all ticks...
+                axs[n].set_xticks(np.arange(len(plotting.columns)))
+                axs[n].set_yticks(np.arange(len(plotting.index)))
+                # ... and label them with the respective list entries
+                axs[n].set_xticklabels(plotting.columns, rotation=90)
+                axs[n].set_yticklabels(plotting.index)  
+                axs[n].invert_yaxis()
             axs[1].set_xlabel("Practice population size")
-            
 
         fig.savefig(f"{output_dir}/declines_by_practice_{plot_type}.png")
 
