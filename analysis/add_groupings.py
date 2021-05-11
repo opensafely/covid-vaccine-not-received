@@ -19,6 +19,12 @@ def add_groupings(df):
                                      df["vacc1_dat"] >= "2020-12-08"
                                      )
 
+    # Any other patients with both a decline and a vaccination (but first vaccine did not follow first decline)
+    df["vaccinated_and_declined_group"] =  df["decline_total_group"] & (
+                                           df["vacc_group"]==True) & (
+                                           df["declined_accepted_group"]==False
+                                           )
+
     # Patients with any other record related to vaccination (and no vaccination or decline)
     ## indicates an attempt or intention to vaccinate but 
     ## (apparently) unsuccessful for reasons other than declining
