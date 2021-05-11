@@ -81,6 +81,10 @@ def add_groupings(df):
     # IF SEV_MENTAL_DAT > SMHRES_DAT | Select | Reject
     df["sevment_group"] = gt(df["sev_mental_dat"], df["smhres_dat"])
 
+    # Patients with Learning disability
+    #
+    df["learndis_group"] = df["learndis_dat"].notnull()
+
     # Patients in Any Clinical Risk Group
     #
     # IF IMMUNOGROUP <> NULL   | Select | Next

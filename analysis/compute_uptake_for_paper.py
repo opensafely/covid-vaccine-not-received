@@ -14,7 +14,7 @@ demographic_cols = [
     "imd_band",
 ]
 #at_risk_cols = ["atrisk_group"] #+ list(at_risk_groups)
-other_cols = ["preg_group"]
+other_cols = ["preg_group", "sevment_group", learndis_group]
 
 cols = demographic_cols  + other_cols #+ at_risk_cols
 
