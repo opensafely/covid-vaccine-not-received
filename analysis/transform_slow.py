@@ -164,7 +164,7 @@ def replace_unknown_dates(row):
     replace with "2020-11-28". 
     """
     for col in ["cov1decl_dat", "cov2decl_dat", "covdecl_imms_dat", "covnot_dat", "covnot_imms_dat"]:
-        if row[col] < "2020-11-29":
+        if row[col] is not None and row[col] < "2020-11-29":
             row[col] = "2020-11-28" #datetime(2020,11,28)
 
 
