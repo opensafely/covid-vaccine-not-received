@@ -20,7 +20,7 @@ extra_at_risk_cols = [group for group in at_risk_groups if group not in group_co
 extra_cols = ["patient_id", "vacc1_dat", "vacc2_dat", "wave", "wave2"]
 
 vacc_cols = []
-for prefix in ["decl", "vacc_any_record", "cov2not"]:
+for prefix in ["decl", "decl_first", "vacc_any_record", "covnot", "covnot_imms"]:
     vacc_cols.append(f"{prefix}_dat")
 for prefix in ["vacc", "decline", "decline_total", "other_reason", "declined_accepted"]:
     vacc_cols.append(f"{prefix}_group")
@@ -64,6 +64,7 @@ def transform(cohort):
     add_missing_vacc_columns(cohort)
     replace_unknown_dates(cohort)
     add_vacc_dates(cohort)
+    add_earliest_decline_dates(cohort)
     add_vacc_decline_dates(cohort)
     add_vacc_any_record_dates(cohort)
     # The PRIMIS spec contains a number of overlapping age bands.  Bands 1 to 12 are
@@ -181,7 +182,7 @@ def replace_unknown_dates(cohort):
     """Where an event date was unknown (1900-01-01) or obviously incorrect (prior to vaccination campaign),
     replace with "2020-11-28". 
     """
-    for col in ["cov1decl_dat", "cov2decl_dat", "cov2not_dat"]:
+    for col in ["cov1decl_dat", "cov2decl_dat", "covnot_dat", "covdecl_imms_dat", "covnot_imms_dat"]:
         cohort.loc[cohort[col]<"2020-11-29", col] = datetime(2020,11,28)
 
     
@@ -191,13 +192,21 @@ def add_vacc_dates(cohort):
     In some cases, a patient will have only one covadm1/2_dat and covrx1/2_dat.
     """
     
-    cohort["vacc1_dat"] = cohort[["covadm1_dat", "covrx1_dat", "cov2snomed_dat"]].min(axis=1)
+    cohort["vacc1_dat"] = cohort[["covadm1_dat", "covrx1_dat", "covsnomed_dat"]].min(axis=1)
     cohort["vacc2_dat"] = cohort[["covadm2_dat", "covrx2_dat"]].min(axis=1)
+
+
+def add_earliest_decline_dates(cohort):
+    """Record earliest date of a decline (irrespective of vaccination status).
+    """
+    
+    cohort["decl_first_dat"] = cohort[["cov1decl_dat", "cov2decl_dat", "covdecl_imms_dat"]].min(axis=1)
+
 
 def add_vacc_decline_dates(cohort):
     """Record decline only if patient has had no vaccine recorded.
     """
-    cohort["decl_dat"] = cohort[["cov1decl_dat", "cov2decl_dat"]].min(axis=1)
+    cohort["decl_dat"] = cohort[["decl_first_dat"]]
 
     # first vaccine date
     s = cohort["decl_dat"]
@@ -210,7 +219,7 @@ def add_vacc_any_record_dates(cohort):
     OR had any record related to vaccine refusal, contraindications etc. 
     """
     
-    cohort["vacc_any_record_dat"] = cohort[["vacc1_dat", "vacc2_dat", "cov2not_dat", "decl_dat"]].min(axis=1)
+    cohort["vacc_any_record_dat"] = cohort[["vacc1_dat", "vacc2_dat", "covnot_dat", "covnot_imms_dat", "decl_dat"]].min(axis=1)
 
 
 def add_waves(cohort):

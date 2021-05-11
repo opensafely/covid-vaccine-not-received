@@ -6,7 +6,9 @@ import pandas as pd
 from age_bands import age_bands
 from add_groupings_2 import add_groupings_2
 from transform_fast import extra_at_risk_cols, extra_vacc_cols, necessary_cols
+from datetime import datetime
 
+necessary_cols.extend(["cov1decl_dat", "cov2decl_dat"])
 
 def run(input_path="output/input.csv", output_path="output/cohort.pickle"):
     with open(input_path) as f:
@@ -36,7 +38,6 @@ def transform(reader):
             "high_level_ethnicity": "int8",
         }
         cohort = pd.read_csv(f.name, parse_dates=date_fieldnames, dtype=dtypes)
-
     return cohort[necessary_cols]
 
 
@@ -46,15 +47,22 @@ def transform_rows(rows):
             continue
         if over_120_age(row):
             continue
+        if under_16_age(row):
+            continue
 
         add_imd_bands(row)
         add_ethnicity(row)
         add_high_level_ethnicity(row)
         add_missing_vacc_columns(row)
+        replace_unknown_dates(row)
         add_vacc_dates(row)
+        add_earliest_decline_dates(row)
+        add_vacc_decline_dates(row)
+        add_vacc_any_record_dates(row)
         add_age_bands(row, range(1, 12 + 1))
         add_groupings_2(row)
         add_waves(row)
+        add_waves_2(row)
         add_extra_at_risk_cols(row)
         row = {k: v for k, v in row.items() if k in necessary_cols}
         yield row
@@ -74,6 +82,12 @@ def over_120_age(row):
 
     return int(row["age"]) >= 120
 
+def under_16_age(row):
+    """Return True if age is < 16.
+
+    """
+
+    return int(row["age"]) < 16
 
 def add_imd_bands(row):
     """Add IMD band from 1 (most deprived) to 5 (least deprived), or 0 if missing."""
@@ -145,6 +159,15 @@ def add_missing_vacc_columns(row):
         row[f"{prefix}d2rx_dat"] = ""
 
 
+def replace_unknown_dates(row):
+    """Where an event date was unknown (1900-01-01) or obviously incorrect (prior to vaccination campaign),
+    replace with "2020-11-28". 
+    """
+    for col in ["cov1decl_dat", "cov2decl_dat", "covdecl_imms_dat", "covnot_dat", "covnot_imms_dat"]:
+        if row[col] is not None and row[col] < "2020-11-29":
+            row[col] = "2020-11-28" #datetime(2020,11,28)
+
+
 def add_vacc_dates(row):
     """Record earliest date of first and second vaccinations.
 
@@ -154,14 +177,43 @@ def add_vacc_dates(row):
     for ix in 1, 2:
         covadm_dat = row[f"covadm{ix}_dat"]
         covrx_dat = row[f"covrx{ix}_dat"]
+        covsnomed_dat = row["covsnomed_dat"]
         vacc_dat_fn = f"vacc{ix}_dat"
+        
 
-        if covadm_dat and covrx_dat:
-            row[vacc_dat_fn] = min(covadm_dat, covrx_dat)
+        if covadm_dat and (covrx_dat or covsnomed_dat):
+            row[vacc_dat_fn] = min(covadm_dat, covrx_dat, covsnomed_dat)
         elif covadm_dat:
             row[vacc_dat_fn] = covadm_dat
         else:
             row[vacc_dat_fn] = covrx_dat
+
+def add_earliest_decline_dates(row):
+    """Record earliest date of a decline (irrespective of vaccination status).
+    """
+    
+    row["decl_first_dat"] = min(row["cov1decl_dat"], row["cov2decl_dat"], row["covdecl_imms_dat"])
+
+
+def add_vacc_decline_dates(row):
+    """Record decline only if patient has had no vaccine recorded.
+    """
+    row["decl_dat"] = row["decl_first_dat"]
+
+    # Replace declined date with null if a vaccine has been recorded
+    if row["vacc1_dat"]:
+        row["decl_dat"] = ""
+
+
+def add_vacc_any_record_dates(row):
+    """Date at which patient went from unvaccinated to vaccinated, 
+    OR had any record related to vaccine refusal, contraindications etc. 
+    """
+    row["vacc_any_record_dat"] = min(row["vacc1_dat"], 
+                                    row["vacc2_dat"], 
+                                    row["covnot_dat"],
+                                    row["covnot_imms_dat"],
+                                    row["decl_dat"])
 
 
 def add_age_bands(row, bands):
@@ -223,6 +275,23 @@ def add_waves(row):
     else:
         row["wave"] = 0
 
+
+def add_waves_2(row):
+
+    # Wave 2.1: Residents in Care Homes and those over 65 (waves 1-3 & 5)
+    if row["wave"] in [1,2,3,5]:
+        row["wave2"] = 1
+
+    # Wave 2.2: CEV (aged 16-69) and At Risk (aged 16-64)
+    elif row["wave"] in [4,6]:
+        row["wave2"] = 2
+
+    # Wave 2.3: 50-64
+    elif row["wave"] in [7,8,9]:
+        row["wave2"] = 3
+
+    else:
+        row["wave2"] = 0
 
 def add_extra_at_risk_cols(row):
     """Add columns for extra at-risk groups."""

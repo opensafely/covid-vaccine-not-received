@@ -544,8 +544,22 @@ study = StudyDefinition(
         }
     ),
 
+    # COVID vaccination declined - from immunisatons table (EMIS)
+    covdecl_imms_dat=patients.with_vaccination_record(
+        returning="date",
+        tpp={
+            "target_disease_matches": "XXXX", # n/a
+        },
+        emis={
+            "procedure_codes": combine_codelists(codelists.cov1decl,codelists.cov2decl),
+        },
+        find_first_match_in_period=True,
+        on_or_before="index_date",
+        date_format="YYYY-MM-DD",
+    ),
+
     # COVID vaccination not given (reasons other than decline)
-    cov2not_dat=patients.with_these_clinical_events(
+    covnot_dat=patients.with_these_clinical_events(
         codelists.cov2not,
         returning="date",
         find_first_match_in_period=True,
@@ -557,8 +571,22 @@ study = StudyDefinition(
         }
     ),
 
+    # COVID vaccination not given - from immunisatons table (EMIS)
+    covnot_imms_dat=patients.with_vaccination_record(
+        returning="date",
+        tpp={
+            "target_disease_matches": "XXXX", # n/a
+        },
+        emis={
+            "procedure_codes": codelists.cov2not,
+        },
+        find_first_match_in_period=True,
+        on_or_before="index_date",
+        date_format="YYYY-MM-DD",
+    ),
+
     # COVID vaccination given (SNOMED)
-    cov2snomed_dat=patients.with_these_clinical_events(
+    covsnomed_dat=patients.with_these_clinical_events(
         codelists.covadm1,
         returning="date",
         find_first_match_in_period=True,
