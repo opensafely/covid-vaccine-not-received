@@ -174,15 +174,19 @@ def add_vacc_dates(row):
     In some cases, a patient will have only one covadm1/2_dat and covrx1/2_dat.
     """
 
+    covsnomed_dat = row["covsnomed_dat"]
+
     for ix in 1, 2:
         covadm_dat = row[f"covadm{ix}_dat"]
         covrx_dat = row[f"covrx{ix}_dat"]
-        covsnomed_dat = row["covsnomed_dat"]
         vacc_dat_fn = f"vacc{ix}_dat"
         
-
-        if covadm_dat and (covrx_dat or covsnomed_dat):
-            row[vacc_dat_fn] = min(covadm_dat, covrx_dat, covsnomed_dat)
+        if covrx_dat and covsnomed_dat:
+            covrx_dat = min(covrx_dat, covsnomed_dat)
+        if covadm_dat and covrx_dat:
+            row[vacc_dat_fn] = min(covadm_dat, covrx_dat)
+        elif covadm_dat and covsnomed_dat:
+            row[vacc_dat_fn] = min(covadm_dat, covsnomed_dat)
         elif covadm_dat:
             row[vacc_dat_fn] = covadm_dat
         else:
@@ -233,7 +237,7 @@ def add_age_bands(row, bands):
 def add_waves(row):
     age = int(row["age"])
 
-    if row["longres_dat"]:
+    if row["longres_dat"] and age >= 65:
         # Wave 1: Residents in Care Homes
         # (The spec includes staff in care homes, but occupation codes are not well
         # recorded)
@@ -244,12 +248,12 @@ def add_waves(row):
         # (This spec includes frontline H&SC workers, but see above.)
         row["wave"] = 2
 
-    elif 75 <= age <= 79:
-        # Wave 3: Age 75 - 79
+    elif 70 <= age <= 79:
+        # Wave 3: Age 70 - 79
         row["wave"] = 3
 
-    elif row["shield_group"] or (70 <= age <= 74):
-        # Wave 4: Clinically Extremely Vulnerable or age 70 - 74
+    elif row["shield_group"]:
+        # Wave 4: Clinically Extremely Vulnerable
         row["wave"] = 4
 
     elif 65 <= age <= 69:

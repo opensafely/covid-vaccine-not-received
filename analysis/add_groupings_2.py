@@ -3,6 +3,12 @@ import pandas as pd
 
 
 def add_groupings_2(row):
+    row["vacc_group"] = add_vacc_group(row)
+    row["decline_group"] = add_decline_group(row)
+    row["decline_total_group"] = add_decline_total_group(row)
+    row["declined_accepted_group"] = add_declined_accepted_group(row)
+    row["vaccinated_and_declined_group"] = add_vacc_and_declined_group(row)
+    row["other_reason_group"] = add_other_reason_group(row)
     row["immuno_group"] = add_immuno_group(row)
     row["ckd_group"] = add_ckd_group(row)
     row["ast_group"] = add_ast_group(row)
@@ -19,6 +25,55 @@ def add_groupings_2(row):
     row["shield_group"] = add_shield_group(row)
     row["preg_group"] = add_preg_group(row)
 
+# Patients with a vaccination
+def add_vacc_group(row):
+    if row["vacc1_dat"] or row["vacc2_dat"]:
+        return True
+    else:
+        return False
+
+# Patients with a decline (but no vaccination - already incorporated in decl_date)
+def add_decline_group(row):
+    if row["decl_dat"]:
+        return True
+    else:
+        return False
+
+# Patients with a decline (irrespective of vaccination status)
+def add_decline_total_group(row):
+    if row["decl_first_dat"]:
+        return True
+    else:
+        return False
+
+# Patients with a decline and a later vaccination
+def add_declined_accepted_group(row):
+    # check that declined date is within the vaccination campaign period not in the past
+    # (otherwise exclude, as unable determine correct sequence of events)
+    if gt(row["vacc1_dat"], row["decl_first_dat"]) and (
+       row["decl_first_dat"] >= "2020-12-08") and (
+       row["vacc1_dat"] >= "2020-12-08"
+       ):
+        return True
+    else:
+        return False
+
+# Any other patients with both a decline and a vaccination (but first vaccine did not follow first decline)
+def add_vacc_and_declined_group(row):
+    if row["decline_total_group"] and row["vacc_group"] and not row["declined_accepted_group"]:
+        return True
+    else:
+        return False
+
+# Patients with any other record related to vaccination (and no vaccination or decline)
+def add_other_reason_group(row):    
+    ## indicates an attempt or intention to vaccinate but 
+    ## (apparently) unsuccessful for reasons other than declining
+    if (row["covnot_dat"] or row["covnot_imms_dat"]) and (
+        not row["vacc1_dat"]) and not row["decl_dat"]:
+        return True
+    else:
+        return False
 
 def add_immuno_group(row):
     # IF IMMRX_DAT <> NULL     | Select | Next
@@ -286,7 +341,7 @@ def add_preg_group(row):
         return False
 
     # IF PREGDEL_DAT > PREG_DAT | Reject | Select
-    if gt(row["pregdel_dat"], row["preg_dat"]):
+    if gt(row["pregdel_dat"], row["preg_dat"]) and row["sex"]=="F" and int(row["age"])<50:
         return False
     else:
         return True
