@@ -9,6 +9,22 @@ backend = os.getenv("OPENSAFELY_BACKEND", "expectations")
 
 cohort = pd.read_pickle(input_path)
 
-checks = cohort.agg({"max","min", "count"}).transpose()
+if backend=="expectations":
+    cohort_s = pd.read_pickle("output/cohort_slow.pickle")
 
-checks.to_csv(f"{output_path}")
+    for col in cohort.columns:
+        print (col)
+        if "_group" not in col:
+            print (cohort[col].count(), cohort_s[col].count())
+
+        else:
+            print (cohort[col].sum(), cohort_s[col].sum())
+
+        if col =="decl_first_dat":
+            print (cohort.groupby([col]).count(), cohort_s.groupby([col]).count())
+
+
+#checks = cohort.agg({"max","min", "count"}).transpose()
+
+#checks.to_csv(f"{output_path}")
+#print(cohort_s.head().transpose())
