@@ -6,7 +6,6 @@ import pandas as pd
 from age_bands import age_bands
 from add_groupings_2 import add_groupings_2
 from transform_fast import extra_at_risk_cols, extra_vacc_cols, necessary_cols
-from datetime import datetime
 
 necessary_cols.extend(["cov1decl_dat", "cov2decl_dat"])
 
@@ -54,7 +53,7 @@ def transform_rows(rows):
         add_ethnicity(row)
         add_high_level_ethnicity(row)
         add_missing_vacc_columns(row)
-        #replace_unknown_dates(row)
+        replace_unknown_dates(row)
         add_vacc_dates(row)
         add_earliest_decline_dates(row)
         add_vacc_decline_dates(row)
@@ -165,10 +164,10 @@ def replace_unknown_dates(row):
     """
     for col in ["cov1decl_dat", "cov2decl_dat", "covdecl_imms_dat", "covnot_dat", "covnot_imms_dat"]:
         d = row[col]
-        if d is None:
-            pass
-        elif (d < datetime(2020,11,28)):
-            row[col] = datetime(2020,11,28)
+        
+        if (d is not None) & (d != ""):
+            if d < "2020-11-29":
+                row[col] = "2020-11-28"
 
 
 def add_vacc_dates(row):
@@ -182,38 +181,26 @@ def add_vacc_dates(row):
         covrx_dat = row[f"covrx{ix}_dat"]
         vacc_dat_fn = f"vacc{ix}_dat"
 
-        if ix==1 and covsnomed_dat:
-            if covrx_dat:
-                covsnomed_dat = pd.Series([covrx_dat, covsnomed_dat]).min()
-            if covadm_dat:
-                row[vacc_dat_fn] = pd.Series([covadm_dat, covsnomed_dat]).min()
-            else:
-                row[vacc_dat_fn] = covsnomed_dat
-        elif covadm_dat and covrx_dat:
-            row[vacc_dat_fn] = pd.Series([covadm_dat, covrx_dat]).min()
-        elif covadm_dat:
-            row[vacc_dat_fn] = covadm_dat
+        if ix==1:
+            dates = pd.Series([covadm_dat, covsnomed_dat, covrx_dat])
         else:
-            row[vacc_dat_fn] = covrx_dat
+            dates = pd.Series([covadm_dat, covrx_dat])
+            
+        date_min = dates.apply(pd.to_datetime, errors='coerce').min()
+        row[vacc_dat_fn] = str(date_min)
+        
+        if str(date_min)=="NaT":
+            row[vacc_dat_fn] = ""
 
 def add_earliest_decline_dates(row):
     """Record earliest date of a decline (irrespective of vaccination status).
     """
-    decl_temp = row["cov1decl_dat"]
-    decl_snomed_temp = row["covdecl_imms_dat"]
-    if decl_temp: 
-        if row["cov2decl_dat"]:
-            decl_temp = min(row["cov1decl_dat"], row["cov2decl_dat"])
-        if row["covdecl_imms_dat"]:
-            row["decl_first_dat"] = min(row["covdecl_imms_dat"], decl_temp)
-        else:
-            row["decl_first_dat"] = decl_temp
-    elif decl_snomed_temp:
-        if row["cov2decl_dat"]:
-            decl_snomed_temp = min(row["covdecl_imms_dat"], row["cov2decl_dat"])
-        row["decl_first_dat"] = decl_snomed_temp
-    else:
-        row["decl_first_dat"] = row["cov1decl_dat"]
+
+    dates = pd.Series([row["cov1decl_dat"], row["cov2decl_dat"], row["covdecl_imms_dat"]])
+    date_min = dates.apply(pd.to_datetime, errors='coerce').min()
+    row["decl_first_dat"] = str(date_min)
+    if str(date_min)=="NaT":
+        row["decl_first_dat"] = ""
 
 
 def add_vacc_decline_dates(row):
@@ -230,11 +217,15 @@ def add_vacc_any_record_dates(row):
     """Date at which patient went from unvaccinated to vaccinated, 
     OR had any record related to vaccine refusal, contraindications etc. 
     """
-    row["vacc_any_record_dat"] = min(row["vacc1_dat"], 
-                                    row["vacc2_dat"], 
-                                    row["covnot_dat"],
-                                    row["covnot_imms_dat"],
-                                    row["decl_dat"])
+    dates = pd.Series([row["vacc1_dat"], 
+                        row["vacc2_dat"], 
+                        row["covnot_dat"],
+                        row["covnot_imms_dat"],
+                        row["decl_dat"]])
+    date_min = dates.apply(pd.to_datetime, errors='coerce').min()
+    row["vacc_any_record_dat"] =  str(date_min)
+    if str(date_min)=="NaT":
+        row["vacc_any_record_dat"] = ""
 
 
 def add_age_bands(row, bands):
