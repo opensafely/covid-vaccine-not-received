@@ -23,7 +23,7 @@ actions:
     needs: [generate_study_population]
     outputs:
       highly_sensitive:
-        cohort: output/cohort.pickle
+        cohort: output/cohort*.pickle
 
   count_prevalences:
     run: python:latest python analysis/count_prevalences.py

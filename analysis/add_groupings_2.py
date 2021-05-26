@@ -336,12 +336,12 @@ def add_shield_group(row):
 
 
 def add_preg_group(row):
-    # IF PREG_DAT<> NULL        | Next   | Reject
-    if not row["preg_dat"]:
+    # IF PREG_DAT<> NULL        | Next   | Reject #### also exclude males and patients aged 50+
+    if not row["preg_dat"] or row["sex"]=="M" or int(row["age"])>=50:
         return False
 
     # IF PREGDEL_DAT > PREG_DAT | Reject | Select
-    if gt(row["pregdel_dat"], row["preg_dat"]) and row["sex"]=="F" and int(row["age"])<50:
+    if gt(row["pregdel_dat"], row["preg_dat"]):
         return False
     else:
         return True
