@@ -9,6 +9,19 @@ from transform_fast import extra_at_risk_cols, extra_vacc_cols, necessary_cols
 
 necessary_cols.extend(["cov1decl_dat", "cov2decl_dat"])
 
+# Get mapping from category (1-16) to high-level category (1-5)
+category_to_high_level_category = {}
+with open("codelists/primis-covid19-vacc-uptake-eth2001.csv") as f:
+    for record in csv.DictReader(f):
+        category = int(record["grouping_16_id"])
+        high_level_category = int(record["grouping_6_id"])
+
+        if category in category_to_high_level_category:
+            assert category_to_high_level_category[category] == high_level_category
+        else:
+            category_to_high_level_category[category] = high_level_category
+
+
 def run(input_path="output/input.csv", output_path="output/cohort.pickle"):
     with open(input_path) as f:
         reader = csv.DictReader(f)
@@ -127,18 +140,6 @@ def add_ethnicity(row):
 
 def add_high_level_ethnicity(row):
     """Add high-level ethnicity categories, based on bandings from PRIMIS spec."""
-
-    # Get mapping from category (1-16) to high-level category (1-5)
-    category_to_high_level_category = {}
-    with open("codelists/primis-covid19-vacc-uptake-eth2001.csv") as f:
-        for record in csv.DictReader(f):
-            category = int(record["grouping_16_id"])
-            high_level_category = int(record["grouping_6_id"])
-
-            if category in category_to_high_level_category:
-                assert category_to_high_level_category[category] == high_level_category
-            else:
-                category_to_high_level_category[category] = high_level_category
 
     # Set high_level_ethnicity based on ethnicity column
     row["high_level_ethnicity"] = category_to_high_level_category.get(
