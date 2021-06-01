@@ -201,7 +201,10 @@ def add_earliest_decline_dates(row):
     dates = [row["cov1decl_dat"], row["cov2decl_dat"], row["covdecl_imms_dat"]]
     actual_dates = [date for date in dates if date]
     
-    row["decl_first_dat"] = min(actual_dates)
+    if actual_dates:
+        row["decl_first_dat"] = min(actual_dates)
+    else:
+        row["decl_first_dat"] = ""
 
 
 def add_vacc_decline_dates(row):
@@ -220,7 +223,11 @@ def add_vacc_any_record_dates(row):
     """
     dates = [row["vacc1_dat"], row["vacc2_dat"], row["covnot_dat"], row["covnot_imms_dat"], row["decl_dat"]]
     actual_dates = [date for date in dates if date]
-    row["vacc_any_record_dat"] =  min(actual_dates)
+    
+    if actual_dates:
+        row["vacc_any_record_dat"] =  min(actual_dates)
+    else:
+        row["vacc_any_record_dat"] = ""
 
 
 def add_age_bands(row, bands):
