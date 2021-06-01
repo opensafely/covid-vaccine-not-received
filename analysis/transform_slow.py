@@ -183,25 +183,25 @@ def add_vacc_dates(row):
         vacc_dat_fn = f"vacc{ix}_dat"
 
         if ix==1:
-            dates = pd.Series([covadm_dat, covsnomed_dat, covrx_dat])
+            dates = [covadm_dat, covsnomed_dat, covrx_dat]
         else:
-            dates = pd.Series([covadm_dat, covrx_dat])
+            dates = [covadm_dat, covrx_dat]
             
-        date_min = dates.apply(pd.to_datetime, errors='coerce').min()
-        row[vacc_dat_fn] = str(date_min)
-        
-        if str(date_min)=="NaT":
+        actual_dates = [date for date in dates if date]
+            
+        if actual_dates:
+            row[vacc_dat_fn] = min(actual_dates)
+        else:
             row[vacc_dat_fn] = ""
 
 def add_earliest_decline_dates(row):
     """Record earliest date of a decline (irrespective of vaccination status).
     """
 
-    dates = pd.Series([row["cov1decl_dat"], row["cov2decl_dat"], row["covdecl_imms_dat"]])
-    date_min = dates.apply(pd.to_datetime, errors='coerce').min()
-    row["decl_first_dat"] = str(date_min)
-    if str(date_min)=="NaT":
-        row["decl_first_dat"] = ""
+    dates = [row["cov1decl_dat"], row["cov2decl_dat"], row["covdecl_imms_dat"]]
+    actual_dates = [date for date in dates if date]
+    
+    row["decl_first_dat"] = min(actual_dates)
 
 
 def add_vacc_decline_dates(row):
@@ -218,15 +218,9 @@ def add_vacc_any_record_dates(row):
     """Date at which patient went from unvaccinated to vaccinated, 
     OR had any record related to vaccine refusal, contraindications etc. 
     """
-    dates = pd.Series([row["vacc1_dat"], 
-                        row["vacc2_dat"], 
-                        row["covnot_dat"],
-                        row["covnot_imms_dat"],
-                        row["decl_dat"]])
-    date_min = dates.apply(pd.to_datetime, errors='coerce').min()
-    row["vacc_any_record_dat"] =  str(date_min)
-    if str(date_min)=="NaT":
-        row["vacc_any_record_dat"] = ""
+    dates = [row["vacc1_dat"], row["vacc2_dat"], row["covnot_dat"], row["covnot_imms_dat"], row["decl_dat"]]
+    actual_dates = [date for date in dates if date]
+    row["vacc_any_record_dat"] =  min(actual_dates)
 
 
 def add_age_bands(row, bands):
