@@ -306,14 +306,14 @@ covcontra = combine_codelists(
 
 # First COVID vaccination declined
 cov1decl = codelist_from_csv(
-    "codelists/primis-covid19-vacc-uptake-cov1decl.csv",
+    "codelists/opensafely-covid-19-vaccination-first-dose-declined.csv",
     system="snomed",
     column="code",
 )
 
 # Second COVID vaccination declined
 cov2decl = codelist_from_csv(
-    "codelists/primis-covid19-vacc-uptake-cov2decl.csv",
+    "codelists/opensafely-covid-19-vaccination-second-dose-declined.csv",
     system="snomed",
     column="code",
 )

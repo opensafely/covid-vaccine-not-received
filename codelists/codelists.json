@@ -234,17 +234,17 @@
       "downloaded_at": "2021-04-19 16:29:42.206563Z",
       "sha": "84cb612bdb9b5b7a4a3dd8c2cecb2ad1be30743f"
     },
-    "primis-covid19-vacc-uptake-cov1decl.csv": {
-      "id": "primis-covid19-vacc-uptake/cov1decl/v1.1",
-      "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/cov1decl/v1.1/",
-      "downloaded_at": "2021-04-19 16:29:42.331945Z",
-      "sha": "c8f6ef075bb2f267ee8524453967ba927703fe9d"
+    "opensafely-covid-19-vaccination-first-dose-declined.csv": {
+      "id": "opensafely/covid-19-vaccination-first-dose-declined/0c16880b",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-19-vaccination-first-dose-declined/0c16880b/",
+      "downloaded_at": "2021-06-01 14:53:48.826564Z",
+      "sha": "fcb6418a6219bb7409029ffce5079c9b2cc98de2"
     },
-    "primis-covid19-vacc-uptake-cov2decl.csv": {
-      "id": "primis-covid19-vacc-uptake/cov2decl/v1.1",
-      "url": "https://codelists.opensafely.org/codelist/primis-covid19-vacc-uptake/cov2decl/v1.1/",
-      "downloaded_at": "2021-04-19 16:29:42.454773Z",
-      "sha": "3d358a04ad7d502378d29fdc5a9f062cb04b83e3"
+    "opensafely-covid-19-vaccination-second-dose-declined.csv": {
+      "id": "opensafely/covid-19-vaccination-second-dose-declined/27d8bb36",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-19-vaccination-second-dose-declined/27d8bb36/",
+      "downloaded_at": "2021-06-01 14:55:47.874354Z",
+      "sha": "5f79648b7682f0fc85eb0c47c1da6dc180c5a89d"
     },
     "opensafely-covid-19-vaccination-did-not-attend-first-appointment.csv": {
       "id": "opensafely/covid-19-vaccination-did-not-attend-first-appointment/300d360f",
@@ -277,10 +277,10 @@
       "sha": "31bd232bfc7745402487a7df70019f9c02b4509c"
     },
     "opensafely-covid-19-vaccination-contraindication-or-allergy.csv": {
-      "id": "opensafely/covid-19-vaccination-contraindication-or-allergy/2840c97c",
-      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-19-vaccination-contraindication-or-allergy/2840c97c/",
-      "downloaded_at": "2021-04-23 11:07:27.550155Z",
-      "sha": "9cc5fcff92c4fdb2b91f84fccec8f0b0835ed7af"
+      "id": "opensafely/covid-19-vaccination-contraindication-or-allergy/59f7a1a0",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-19-vaccination-contraindication-or-allergy/59f7a1a0/",
+      "downloaded_at": "2021-06-01 14:53:53.253499Z",
+      "sha": "67786a8943b4ff6db04cbb2d6807fa9288b45051"
     },
     "opensafely-covid-19-vaccination-given.csv": {
       "id": "opensafely/covid-19-vaccination-given/0f315647",
