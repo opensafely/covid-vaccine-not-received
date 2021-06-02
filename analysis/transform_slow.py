@@ -9,6 +9,19 @@ from transform_fast import extra_at_risk_cols, extra_vacc_cols, necessary_cols
 
 necessary_cols.extend(["cov1decl_dat", "cov2decl_dat"])
 
+# Get mapping from category (1-16) to high-level category (1-5)
+category_to_high_level_category = {}
+with open("codelists/primis-covid19-vacc-uptake-eth2001.csv") as f:
+    for record in csv.DictReader(f):
+        category = int(record["grouping_16_id"])
+        high_level_category = int(record["grouping_6_id"])
+
+        if category in category_to_high_level_category:
+            assert category_to_high_level_category[category] == high_level_category
+        else:
+            category_to_high_level_category[category] = high_level_category
+
+
 def run(input_path="output/input.csv", output_path="output/cohort.pickle"):
     with open(input_path) as f:
         reader = csv.DictReader(f)
@@ -128,18 +141,6 @@ def add_ethnicity(row):
 def add_high_level_ethnicity(row):
     """Add high-level ethnicity categories, based on bandings from PRIMIS spec."""
 
-    # Get mapping from category (1-16) to high-level category (1-5)
-    category_to_high_level_category = {}
-    with open("codelists/primis-covid19-vacc-uptake-eth2001.csv") as f:
-        for record in csv.DictReader(f):
-            category = int(record["grouping_16_id"])
-            high_level_category = int(record["grouping_6_id"])
-
-            if category in category_to_high_level_category:
-                assert category_to_high_level_category[category] == high_level_category
-            else:
-                category_to_high_level_category[category] = high_level_category
-
     # Set high_level_ethnicity based on ethnicity column
     row["high_level_ethnicity"] = category_to_high_level_category.get(
         row["ethnicity"], 6  # 6 is "unknown"
@@ -182,24 +183,27 @@ def add_vacc_dates(row):
         vacc_dat_fn = f"vacc{ix}_dat"
 
         if ix==1:
-            dates = pd.Series([covadm_dat, covsnomed_dat, covrx_dat])
+            dates = [covadm_dat, covsnomed_dat, covrx_dat]
         else:
-            dates = pd.Series([covadm_dat, covrx_dat])
+            dates = [covadm_dat, covrx_dat]
             
-        date_min = dates.apply(pd.to_datetime, errors='coerce').min()
-        row[vacc_dat_fn] = str(date_min)
-        
-        if str(date_min)=="NaT":
+        actual_dates = [date for date in dates if date]
+            
+        if actual_dates:
+            row[vacc_dat_fn] = min(actual_dates)
+        else:
             row[vacc_dat_fn] = ""
 
 def add_earliest_decline_dates(row):
     """Record earliest date of a decline (irrespective of vaccination status).
     """
 
-    dates = pd.Series([row["cov1decl_dat"], row["cov2decl_dat"], row["covdecl_imms_dat"]])
-    date_min = dates.apply(pd.to_datetime, errors='coerce').min()
-    row["decl_first_dat"] = str(date_min)
-    if str(date_min)=="NaT":
+    dates = [row["cov1decl_dat"], row["cov2decl_dat"], row["covdecl_imms_dat"]]
+    actual_dates = [date for date in dates if date]
+    
+    if actual_dates:
+        row["decl_first_dat"] = min(actual_dates)
+    else:
         row["decl_first_dat"] = ""
 
 
@@ -217,14 +221,12 @@ def add_vacc_any_record_dates(row):
     """Date at which patient went from unvaccinated to vaccinated, 
     OR had any record related to vaccine refusal, contraindications etc. 
     """
-    dates = pd.Series([row["vacc1_dat"], 
-                        row["vacc2_dat"], 
-                        row["covnot_dat"],
-                        row["covnot_imms_dat"],
-                        row["decl_dat"]])
-    date_min = dates.apply(pd.to_datetime, errors='coerce').min()
-    row["vacc_any_record_dat"] =  str(date_min)
-    if str(date_min)=="NaT":
+    dates = [row["vacc1_dat"], row["vacc2_dat"], row["covnot_dat"], row["covnot_imms_dat"], row["decl_dat"]]
+    actual_dates = [date for date in dates if date]
+    
+    if actual_dates:
+        row["vacc_any_record_dat"] =  min(actual_dates)
+    else:
         row["vacc_any_record_dat"] = ""
 
 
