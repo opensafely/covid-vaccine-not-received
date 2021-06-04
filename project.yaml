@@ -45,7 +45,7 @@ actions:
     outputs:
       moderately_sensitive:
         additional_charts: output/*/additional_figures/*.png
-        prac_table: output/*/additional_figures/practice_decline_summary.csv
+        prac_tables: output/*/additional_figures/*.csv
 
   generate_outputs:
     run: python:latest python analysis/run_charts_and_tables.py

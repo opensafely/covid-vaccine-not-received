@@ -2,6 +2,7 @@
 ''' 
 
 import os
+from numpy.core.numeric import NaN
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -98,6 +99,10 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
             for n, x in enumerate(["decline_per_1000", "decline_per_1000_vacc"]):
                 labels[n] = [str(a)+"-<"+str(b) for (a,b) in zip(bins[n][:-1], bins[n][1:])]
                 binned = pd.cut(out[x], bins=bins[n], labels=labels[n], retbins=False, include_lowest=True, right=False)
+                
+                binnedcsv = pd.DataFrame(binned.value_counts()).sort_index().replace([0,1,2,3],np.NaN)
+                binnedcsv.to_csv(f'{output_dir}/practice_list_size_{x}.csv')
+                
                 binned = pd.DataFrame(binned.value_counts(normalize=True)).sort_index()
 
                 axs[n].bar(binned.index, binned[x])
@@ -135,8 +140,9 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
                     plotting_dict = {}
                     for l in plotting.index.unique():
                         # create a list of values for each practice size group
-                        temp = plotting.loc[l].to_list()
-                        plotting_dict[l] = temp
+                        if l is not NaN:
+                            temp = plotting.loc[l].to_list()
+                            plotting_dict[l] = temp
                     axs[n].boxplot(list(plotting_dict.values()))
                     if "per_1000_vacc" in x:
                         title = "COVID Vaccines Declined per 1000 vaccinated patients\n in priority groups per practice"
@@ -171,6 +177,9 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
 
                 plotting = out.groupby([f"{x}_binned","prac_size"])[["patient_count"]].count().unstack()
                 plotting.columns = plotting.columns.droplevel()
+
+                # export csv
+                plotting.replace([0,1,2,3],np.NaN).to_csv(f'{output_dir}/practice_list_size_2_{x}.csv')
 
                 # plot heat map
                 im = axs[n].imshow(plotting, cmap='RdPu', interpolation='nearest')
