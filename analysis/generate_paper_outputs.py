@@ -458,7 +458,6 @@ def compute_uptake_percent(uptake, labels):
         # Fixed ascending sort order for age bands
         ordered_cols = [k for k in labels.keys() if k in uptake_pc.columns]
         uptake_pc = uptake_pc[ordered_cols]
-        print(uptake_pc.columns)
     if set(uptake_pc.columns) == {"True", "False"}:
         # This ensures that chart series are always same colour.
         uptake_pc = uptake_pc[["True", "False"]]

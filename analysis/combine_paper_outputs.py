@@ -8,10 +8,11 @@ from combine_cumsums import combine_cumsums
 
 def run():
     # combine cumulative sums
-    # for emis_path in sorted(
-    #         glob.glob("released_outputs/emis/cumulative_coverage/*/*/*.csv")
-    #     ):
-    #     combine(emis_path, cumsums=True)
+    for emis_path in sorted(
+            glob.glob("released_outputs/emis/cumulative_coverage/*/*/*.csv")
+        ):
+        combine(emis_path, cumsums=True)
+
     # combine other paths
     for emis_path in ["released_outputs/emis/tables/prevalences.csv",
             "released_outputs/emis/additional_figures/practice_decline_summary.csv"]:
@@ -52,7 +53,6 @@ def combine(emis_path, cumsums=True):
         df1 = pd.read_csv(path).set_index("Unnamed: 0").rename(columns={"Declined_percent":group})
 
         df = df.join(df1[[group]])
-    print(df.head())
     df.to_csv("released_outputs/combined/tables/waves_1_9_declined_high_level_ethnicity.csv")
 
 
