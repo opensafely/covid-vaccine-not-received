@@ -1,6 +1,7 @@
 # Table of contents
 
 * output
+  * [output/cohort_checks.csv](output/cohort_checks.csv)
   * output/emis
     * output/emis/additional_figures
       * [output/emis/additional_figures/all_declined_then_accepted_by_wave.png](output/emis/additional_figures/all_declined_then_accepted_by_wave.png)
