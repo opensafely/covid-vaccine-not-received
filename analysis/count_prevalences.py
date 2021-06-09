@@ -18,7 +18,7 @@ def count_prevalences(cohort):
         
         cols = ["vacc_group", "decline_group","decline_total_group",
         "other_reason_group", "declined_accepted_group", "vaccinated_and_declined_group",
-        "preg_group", "sevment_group", "learndis_group"]
+        "preg_group", "sevment_group", "learndis_group", "immuno_group"]
         
         prevalences = pd.DataFrame(
             {"total": cohort.groupby([f"wave{group_type}"])["patient_id"].count()}
