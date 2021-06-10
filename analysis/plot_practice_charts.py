@@ -21,7 +21,7 @@ def plot_hist(df=None, dfs= None, output_dir=None):
                 dict mapping "decline_per_1000" and "decline_per_1000_vacc" each to a df 
                 with a column of the same name and index a series of ranges of values (e.g. "20-30")
     ''' 
-    if df: 
+    if df is not None: 
         out = df.copy()
             
         bins = {0: [0,5,10,15,20,25,30,35,40,45,50,100,500],
@@ -103,7 +103,7 @@ def plot_boxplot(df=None, backend=None, output_dir=None):
             
 
 def plot_heatmap(df=None, dfs=None, backend=None, output_dir=None): 
-    if df:
+    if df is not None:
         out = df.copy()
         # ensure that at least 1% of people in each practice have been vaccinated
         # (those with a v young population e.g. student/military may have small numbers)
