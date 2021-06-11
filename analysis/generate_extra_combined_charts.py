@@ -30,7 +30,8 @@ def plot_grouped_bar(backend="combined", output_dir="released_outputs/combined",
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
     ax.set_ylabel('%')
-    ax.set_title(f'Percent of people of each {breakdown}\n who have a decline recorded and are unvaccinated, by priority group')
+    breakdown_title = breakdown.replace("_"," ").title().replace("Imd","IMD")
+    ax.set_title(f'Percent of people in each {breakdown_title}\n who have a decline recorded and are unvaccinated,\nby priority group')
     ax.set_xticks(x)
     labels_new = [l.replace(" ", "\n") for l in labels]
     ax.set_xticklabels(labels_new)
