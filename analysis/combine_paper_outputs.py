@@ -9,21 +9,21 @@ from combine_cumsums import combine_cumsums
 def run():
     # combine cumulative sums
     for emis_path in sorted(
-            glob.glob("released_outputs/emis/cumulative_coverage/*/*/*.csv")
-        ):
-        combine(emis_path, cumsums=True)
+           glob.glob("released_outputs/emis/cumulative_coverage/*/*/*.csv")
+       ):
+       combine(emis_path, cumsums=True)
 
-    # combine other paths
+    # combine other files
     for emis_path in ["released_outputs/emis/tables/prevalences.csv",
             "released_outputs/emis/additional_figures/practice_decline_summary.csv"]:
         combine(emis_path, cumsums=False)
     for emis_path in (
         glob.glob("released_outputs/emis/additional_figures/practice_list_size*.csv")):
         combine(emis_path, cumsums=False)
-    for emis_path in (
-        glob.glob("released_outputs/emis/tables/wave_*_declined_high_level_ethnicity.csv")
-        ):
-        combine(emis_path, cumsums=False)        
+    
+    combine_multiple_waves()
+    combine_multiple_waves(breakdown="imd_band",
+                        ix=["Unknown","1 (most deprived)","2","3","4","5 (least deprived)"])        
 
 
 def combine(emis_path, cumsums=True):
@@ -43,17 +43,22 @@ def combine(emis_path, cumsums=True):
     os.makedirs(os.path.dirname(combined_path), exist_ok=True)
     combined_df.to_csv(combined_path)
 
+def combine_multiple_waves(breakdown="high_level_ethnicity",
+                            ix=["White","Mixed","South Asian", "Black", "Other", "Unknown"]):
     # create table of percent declined by ethnicity across all cohorts
-    df = pd.DataFrame(index=["White","Mixed","South Asian", "Black", "Other", "Unknown"])
+    base_path = "released_outputs/combined/tables/"
+
+    df = pd.DataFrame(index=ix)
+
     for path in sorted(
-                glob.glob("released_outputs/combined/tables/wave_*_declined_high_level_ethnicity.csv")
+                glob.glob(f"{base_path}wave_*_declined_{breakdown}.csv")
         ):
+        print(path)
         pos = path.find("wave_")
         group = path[pos+5:pos+6]
         df1 = pd.read_csv(path).set_index("Unnamed: 0").rename(columns={"Declined_percent":group})
 
         df = df.join(df1[[group]])
-    df.to_csv("released_outputs/combined/tables/waves_1_9_declined_high_level_ethnicity.csv")
-
+    df.to_csv(f"{base_path}waves_1_9_declined_{breakdown}.csv")
 
 run()

@@ -15,6 +15,11 @@ df2 = pd.read_csv(base_path+"/additional_figures/practice_list_size_decline_per_
 df1["decline_per_1000"] = df1["decline_per_1000"]/df1["decline_per_1000"].sum()
 df2["decline_per_1000_vacc"] = df2["decline_per_1000_vacc"]/df2["decline_per_1000_vacc"].sum()
 
+df1["decline_per_1000_cumsum"] = df1.cumsum()
+df2["decline_per_1000_vacc_cumsum"] = df2.cumsum()
+
+print(df1, df2)
+
 # combine dfs into a dict
 dfs ={"decline_per_1000": df1,
       "decline_per_1000_vacc": df2}
