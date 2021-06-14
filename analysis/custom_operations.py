@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import PercentFormatter
+from ethnicities import high_level_ethnicities
 
 wave_column_headings = {
     "total": "All",
@@ -101,7 +102,7 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
                 binned = pd.cut(out[x], bins=bins[n], labels=labels[n], retbins=False, include_lowest=True, right=False)
                 
                 binnedcsv = pd.DataFrame(binned.value_counts()).sort_index().replace([0,1,2,3],np.NaN)
-                binnedcsv.to_csv(f'{output_dir}/practice_list_size_{x}.csv')
+                binnedcsv.to_csv(f'{output_dir}/practice_counts_{x}.csv')
                 
                 binned = pd.DataFrame(binned.value_counts(normalize=True)).sort_index()
 
@@ -179,7 +180,7 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
                 plotting.columns = plotting.columns.droplevel()
 
                 # export csv
-                plotting.replace([0,1,2,3],np.NaN).to_csv(f'{output_dir}/practice_list_size_2_{x}.csv')
+                plotting.replace([0,1,2,3],np.NaN).to_csv(f'{output_dir}/practice_list_size_{x}.csv')
 
                 # plot heat map
                 im = axs[n].imshow(plotting, cmap='RdPu', interpolation='nearest')
@@ -218,39 +219,87 @@ def declined_vaccinated(input_path="output/cohort.pickle", output_dir=out_path):
         Creates a chart. 
     '''
 
-    cohort = pd.read_pickle(input_path)
+    cohort_all = pd.read_pickle(input_path)
 
-    cohort["wave"] = cohort["wave"].astype(str)
-    cohort = cohort[["wave", "vacc_group", "declined_accepted_group", "decline_total_group", "patient_id"]]\
-                        .groupby("wave").agg({"vacc_group":"sum", 
-                                              "declined_accepted_group":"sum", 
-                                              "decline_total_group":"sum", 
-                                              "patient_id":"nunique"})
+    cohort_all["wave"] = cohort_all["wave"].astype(str)
+    
+    cohort = cohort_all.copy()[["wave", "vacc_group", "declined_accepted_group", "decline_total_group", "patient_id"]]
+
+    # look at all priority groups
+    cohort = cohort.groupby("wave").agg({"vacc_group":"sum", 
+                                        "declined_accepted_group":"sum", 
+                                        "decline_total_group":"sum", 
+                                        "patient_id":"nunique"})
     cohort = cohort.rename(columns=group_names, index=wave_column_headings)
+    cohort = ((cohort // 7) * 7).astype(int)
+    cohort.to_csv(f'{output_dir}/declined_then_accepted.csv')
+    cohort = cohort.assign(
+        per_1000 = 1000*cohort["Declined then accepted"]/cohort["total"],
+        per_1000_vacc = 1000*cohort["Declined then accepted"]/cohort["Vaccinated"],
+        converted = 1000*cohort["Declined then accepted"]/cohort["Declined - all"]
+    )
+
+    # plot charts
+    plot_decl_acc_charts(df=cohort, output_dir=output_dir, chart="all")
+    
+
+    # look at priority groups split by demographics
+
+    cohort = cohort_all[["wave", "vacc_group", "declined_accepted_group", "decline_total_group", "patient_id", 
+                        "high_level_ethnicity"]]
+
+    # group by wave and ethnicity
+    cohort = cohort.groupby(["wave", "high_level_ethnicity"]).agg({"vacc_group":"sum", 
+                                    "declined_accepted_group":"sum", 
+                                    "decline_total_group":"sum", 
+                                    "patient_id":"nunique"})
+ 
+    # rename column headers and indices (2 levels)
+    cohort = cohort.rename(index=high_level_ethnicities, columns=group_names)
+    cohort = cohort.rename(index=wave_column_headings)
+
+    # low number suppression and rounding
+    cohort = cohort.replace([1,2,3,4,5,6], 0)
+    cohort = ((cohort // 7) * 7).astype(int)
 
     cohort = cohort.assign(
         per_1000 = 1000*cohort["Declined then accepted"]/cohort["total"],
         per_1000_vacc = 1000*cohort["Declined then accepted"]/cohort["Vaccinated"],
         converted = 1000*cohort["Declined then accepted"]/cohort["Declined - all"]
     )
+
+    cohort.to_csv(f'{output_dir}/declined_then_accepted_by_wave.csv')
+
     
-    fig, axs = plt.subplots(3, 1, sharex=True, tight_layout=True, figsize=(6,12))
-    for n, x in enumerate(["per_1000", "per_1000_vacc", "converted"]):
-        cohort[x].plot(kind='bar', stacked=True, ax=axs[n])
-        if x=="per_1000_vacc":
-            title = "Patients Declining and later Accepting COVID Vaccines\n per 1000 vaccinated patients"  
-        elif x=="converted":
-            title = "Patients Declining and later Accepting COVID Vaccines\n per 1000 patients who declined"
-        else:
-            title = "Patients Declining and later Accepting COVID Vaccines\n per 1000 patients"
-        
-        axs[n].set_ylabel("Rate per 1000")
-        axs[n].set_title(title)
+def plot_decl_acc_charts(df, output_dir, chart="all"):
+    '''
+    Plots one or 3 charts of vaccines declined-then-accepted.
+    'chart' can be one of "per_1000", "per_1000_vacc", "converted", or "all"
+    '''
 
-    axs[1].set_xlabel("Priority group")
+    cohort = df
+    titles = {"per_1000_vacc":"Patients Declining and later Accepting COVID Vaccines\n per 1000 vaccinated patients",  
+              "converted": "Patients Declining and later Accepting COVID Vaccines\n per 1000 patients who declined",
+              "per_1000": "Patients Declining and later Accepting COVID Vaccines\n per 1000 patients"
+    }
 
-    fig.savefig(f"{output_dir}/all_declined_then_accepted_by_wave.png")
-
+    if chart=="all": # plot 3 charts
+        fig, axs = plt.subplots(3, 1, sharex=True, tight_layout=True, figsize=(6,12))
+        for n, x in enumerate(["per_1000", "per_1000_vacc", "converted"]):
+            cohort[x].plot(kind='bar', stacked=True, ax=axs[n])
+            title = titles[x]
+            axs[n].set_ylabel("Rate per 1000")
+            axs[n].set_title(title)
+        axs[1].set_xlabel("Priority group")
+    else: # plot a single chart as specified
+        fig, ax = plt.subplots(figsize=(10,10))
+        cohort[chart].plot(kind='bar', stacked=True, ax=ax)
+        title = titles[chart]
+        ax.set_ylabel("Rate per 1000")
+        ax.set_title(title)
+        ax.set_xlabel("Priority group")
+    
+    fig.savefig(f"{output_dir}/{chart}_declined_then_accepted_by_wave.png")
 
 
 def invert_df(df, group="all"):
