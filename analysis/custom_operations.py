@@ -270,7 +270,67 @@ def declined_vaccinated(input_path="output/cohort.pickle", output_dir=out_path):
 
     cohort.to_csv(f'{output_dir}/declined_then_accepted_by_wave.csv')
 
+
+def decl_acc_time_delay(input_path="output/cohort.pickle", output_dir=out_path):
+    '''
+    Measures the time between recorded decline and vaccination for each pt in the declined-then-accepted group,
+    and groups to number of weeks.
+    '''
+
+    cohort = pd.read_pickle(input_path)
+
+    # filter to the declined-then-accepted group
+    cohort = cohort.loc[cohort["declined_accepted_group"]==1]
+    cohort = cohort[["wave", "declined_accepted_group", "patient_id", "vacc1_dat", "decl_first_dat", "high_level_ethnicity"]]
+    cohort["wave"] = cohort["wave"].astype(str)
+    # calculate no of days between recorded decline and vaccination.
+    cohort["date_diff"] = cohort["vacc1_dat"] - cohort['decl_first_dat']
     
+    # bin the data
+    bins = [
+        pd.Timedelta(days = 0),
+        pd.Timedelta(days = 7),
+        pd.Timedelta(days = 14),
+        pd.Timedelta(days = 21),
+        pd.Timedelta(days = 28),
+        pd.Timedelta(weeks = 8),
+        pd.Timedelta(weeks = 12),
+        pd.Timedelta(weeks = 120)
+        ]
+    labels = ["0-<1 week","1-<2 weeks", "2-<3 weeks", "3-<4 weeks", "1-<2 months", "2-<3 months", ">=3 months"
+    ]
+    cohort["weeks_diff"] = pd.cut(cohort["date_diff"], bins=bins, labels=labels, retbins=False, include_lowest=True, right=False)
+    
+
+    # summarise for each group
+    cohort_a = cohort.groupby(["wave","weeks_diff"])["patient_id"].count()
+    cohort_a = cohort_a.rename(index=wave_column_headings)
+    
+    # low number suppression and rounding
+    cohort_a = cohort_a.replace([1,2,3,4,5,6], 0)
+    cohort_a = ((cohort_a // 7) * 7).astype(int)
+
+    cohort_a.to_csv(f"{output_dir}/declined_accepted_weeks_by_wave.csv")
+
+    
+    # look at priority groups split by demographics
+
+    cohort_b = cohort.copy()
+
+    # group by wave and ethnicity
+    cohort_b = cohort_b.groupby(["wave", "high_level_ethnicity","weeks_diff"])["patient_id"].count()
+ 
+    # rename column headers and indices (2 levels)
+    cohort_b = cohort_b.rename(index=high_level_ethnicities)
+    cohort_b = cohort_b.rename(index=wave_column_headings)
+
+    # low number suppression and rounding
+    cohort_b = cohort_b.replace([1,2,3,4,5,6], 0)
+    cohort_b = ((cohort_b // 7) * 7).astype(int)
+
+    cohort_b.to_csv(f"{output_dir}/declined_accepted_weeks_by_wave_and_ethnicity.csv")
+    
+
 def plot_decl_acc_charts(df, output_dir, chart="all"):
     '''
     Plots one or 3 charts of vaccines declined-then-accepted.
