@@ -1,0 +1,71 @@
+wave,weeks_diff,patient_id
+Other,0-<1 week,1309
+Other,1-<2 weeks,896
+Other,2-<3 weeks,665
+Other,3-<4 weeks,427
+Other,1-<2 months,952
+Other,2-<3 months,371
+Other,>=3 months,126
+In care home,0-<1 week,70
+In care home,1-<2 weeks,70
+In care home,2-<3 weeks,63
+In care home,3-<4 weeks,56
+In care home,1-<2 months,217
+In care home,2-<3 months,119
+In care home,>=3 months,56
+80+,0-<1 week,1092
+80+,1-<2 weeks,1050
+80+,2-<3 weeks,924
+80+,3-<4 weeks,1267
+80+,1-<2 months,4207
+80+,2-<3 months,1722
+80+,>=3 months,952
+70-79,0-<1 week,2471
+70-79,1-<2 weeks,1610
+70-79,2-<3 weeks,1127
+70-79,3-<4 weeks,1092
+70-79,1-<2 months,2807
+70-79,2-<3 months,987
+70-79,>=3 months,679
+CEV,0-<1 week,1155
+CEV,1-<2 weeks,1106
+CEV,2-<3 weeks,910
+CEV,3-<4 weeks,777
+CEV,1-<2 months,2051
+CEV,2-<3 months,903
+CEV,>=3 months,476
+65-69,0-<1 week,833
+65-69,1-<2 weeks,602
+65-69,2-<3 weeks,448
+65-69,3-<4 weeks,371
+65-69,1-<2 months,945
+65-69,2-<3 months,364
+65-69,>=3 months,182
+At risk,0-<1 week,1582
+At risk,1-<2 weeks,1246
+At risk,2-<3 weeks,945
+At risk,3-<4 weeks,714
+At risk,1-<2 months,1799
+At risk,2-<3 months,819
+At risk,>=3 months,224
+60-64,0-<1 week,1281
+60-64,1-<2 weeks,651
+60-64,2-<3 weeks,315
+60-64,3-<4 weeks,168
+60-64,1-<2 months,357
+60-64,2-<3 months,189
+60-64,>=3 months,21
+55-59,0-<1 week,2380
+55-59,1-<2 weeks,1379
+55-59,2-<3 weeks,448
+55-59,3-<4 weeks,210
+55-59,1-<2 months,413
+55-59,2-<3 months,196
+55-59,>=3 months,21
+50-54,0-<1 week,1883
+50-54,1-<2 weeks,714
+50-54,2-<3 weeks,315
+50-54,3-<4 weeks,196
+50-54,1-<2 months,511
+50-54,2-<3 months,182
+50-54,>=3 months,35
