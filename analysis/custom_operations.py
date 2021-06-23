@@ -289,16 +289,13 @@ def decl_acc_time_delay(input_path="output/cohort.pickle", output_dir=out_path):
     # bin the data
     bins = [
         pd.Timedelta(days = 0),
-        pd.Timedelta(days = 7),
         pd.Timedelta(days = 14),
-        pd.Timedelta(days = 21),
         pd.Timedelta(days = 28),
         pd.Timedelta(weeks = 8),
-        pd.Timedelta(weeks = 12),
         pd.Timedelta(weeks = 120)
         ]
-    labels = ["0-<1 week","1-<2 weeks", "2-<3 weeks", "3-<4 weeks", "1-<2 months", "2-<3 months", ">=3 months"
-    ]
+    labels = ["0-<2 weeks", "2-<4 weeks", "1-<2 months", ">=2 months"]
+
     cohort["weeks_diff"] = pd.cut(cohort["date_diff"], bins=bins, labels=labels, retbins=False, include_lowest=True, right=False)
     
 
