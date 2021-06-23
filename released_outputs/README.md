@@ -1,5 +1,6 @@
 # Table of contents
 
+* [declined_accepted_weeks_by_wave.csv](declined_accepted_weeks_by_wave.csv)
 * output
   * output/emis
     * output/emis/additional_figures
@@ -493,6 +494,8 @@
       * [output/emis/tables/prevalences.csv](output/emis/tables/prevalences.csv)
   * output/tpp
     * output/tpp/additional_figures
+      * [output/tpp/additional_figures/declined_accepted_weeks_by_wave.csv](output/tpp/additional_figures/declined_accepted_weeks_by_wave.csv)
+      * [output/tpp/additional_figures/declined_accepted_weeks_by_wave_and_ethnicity.csv](output/tpp/additional_figures/declined_accepted_weeks_by_wave_and_ethnicity.csv)
       * [output/tpp/additional_figures/declined_then_accepted.csv](output/tpp/additional_figures/declined_then_accepted.csv)
       * [output/tpp/additional_figures/declined_then_accepted_by_wave.csv](output/tpp/additional_figures/declined_then_accepted_by_wave.csv)
       * [output/tpp/additional_figures/practice_decline_summary.csv](output/tpp/additional_figures/practice_decline_summary.csv)
