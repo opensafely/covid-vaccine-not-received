@@ -14,3 +14,8 @@ run(base_path, start_date, end_date)
 # plot combined-only charts
 plot_grouped_bar(backend=backend, output_dir=base_path, breakdown="high_level_ethnicity")
 plot_grouped_bar(backend=backend, output_dir=base_path, breakdown="imd_band")
+
+
+# create summary chart of patients declining then accepting vaccines, by priority group
+
+plot_grouped_bar(backend=backend, output_dir=base_path, measure= "declined_then_accepted", breakdown="high_level_ethnicity")
