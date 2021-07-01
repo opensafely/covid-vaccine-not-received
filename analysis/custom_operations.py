@@ -29,7 +29,7 @@ group_names = {
     "decline_group":"Declined", 
     "decline_total_group":"Declined - all",
     "other_reason_group":"Other reason",
-    "declined_accepted_group": "Declined then accepted",
+    "declined_accepted_group": "Declined then received",
     "patient_id":"total"
     }
 
@@ -146,11 +146,11 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
                             plotting_dict[l] = temp
                     axs[n].boxplot(list(plotting_dict.values()))
                     if "per_1000_vacc" in x:
-                        title = "COVID Vaccines Declined per 1000 vaccinated patients\n in priority groups per practice"
+                        title = "COVID Vaccines Recorded as Declined per 1000 vaccinated patients\n in priority groups per practice"
                         ylabel = "Rate per 1000"
                     else:
-                        title = "COVID Vaccines Declined\n per practice"
-                        ylabel = "Vaccines Declined"
+                        title = "COVID Vaccines Recorded as Declined\n per practice"
+                        ylabel = "Vaccines Recorded as Declined"
                     axs[n].set_ylabel(ylabel)
                     axs[n].set_title(title)
                 ticks = axs[n].get_xticks()
@@ -194,7 +194,7 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
                     ylabel = "Rate per 1000"
                 else:
                     title = "COVID Vaccines recorded as Declined\n per practice"
-                    ylabel = "Vaccines Declined"
+                    ylabel = "Vaccines Recorded as Declined"
 
                 axs[n].set_ylabel(ylabel)
                 axs[n].set_title(title)
@@ -220,6 +220,9 @@ def declined_vaccinated(input_path="output/cohort.pickle", output_dir=out_path):
     '''
 
     cohort_all = pd.read_pickle(input_path)
+    
+    # limit to priority groups (ages 50+ and clinical priority groups)
+    cohort_all = cohort_all.loc[cohort_all["wave"]!=0]
 
     cohort_all["wave"] = cohort_all["wave"].astype(str)
     
@@ -234,9 +237,9 @@ def declined_vaccinated(input_path="output/cohort.pickle", output_dir=out_path):
     cohort = ((cohort // 7) * 7).astype(int)
     cohort.to_csv(f'{output_dir}/declined_then_accepted.csv')
     cohort = cohort.assign(
-        per_1000 = 1000*cohort["Declined then accepted"]/cohort["total"],
-        per_1000_vacc = 1000*cohort["Declined then accepted"]/cohort["Vaccinated"],
-        converted = 1000*cohort["Declined then accepted"]/cohort["Declined - all"]
+        per_1000 = 1000*cohort["Declined then received"]/cohort["total"],
+        per_1000_vacc = 1000*cohort["Declined then received"]/cohort["Vaccinated"],
+        converted = 1000*cohort["Declined then received"]/cohort["Declined - all"]
     )
 
     # plot charts
@@ -263,9 +266,9 @@ def declined_vaccinated(input_path="output/cohort.pickle", output_dir=out_path):
     cohort = ((cohort // 7) * 7).astype(int)
 
     cohort = cohort.assign(
-        per_1000 = 1000*cohort["Declined then accepted"]/cohort["total"],
-        per_1000_vacc = 1000*cohort["Declined then accepted"]/cohort["Vaccinated"],
-        converted = 1000*cohort["Declined then accepted"]/cohort["Declined - all"]
+        per_1000 = 1000*cohort["Declined then received"]/cohort["total"],
+        per_1000_vacc = 1000*cohort["Declined then received"]/cohort["Vaccinated"],
+        converted = 1000*cohort["Declined then received"]/cohort["Declined - all"]
     )
 
     cohort.to_csv(f'{output_dir}/declined_then_accepted_by_wave.csv')
@@ -278,6 +281,9 @@ def decl_acc_time_delay(input_path="output/cohort.pickle", output_dir=out_path):
     '''
 
     cohort = pd.read_pickle(input_path)
+
+    # limit to priority groups (ages 50+ and clinical priority groups)
+    cohort = cohort.loc[cohort["wave"]!=0]
 
     # filter to the declined-then-accepted group
     cohort = cohort.loc[cohort["declined_accepted_group"]==1]
@@ -335,9 +341,9 @@ def plot_decl_acc_charts(df, output_dir, chart="all"):
     '''
 
     cohort = df
-    titles = {"per_1000_vacc":"Patients Declining and later Accepting COVID Vaccines\n per 1000 vaccinated patients",  
-              "converted": "Patients Declining and later Accepting COVID Vaccines\n per 1000 patients who declined",
-              "per_1000": "Patients Declining and later Accepting COVID Vaccines\n per 1000 patients"
+    titles = {"per_1000_vacc":"Patients Declining and later Receiving COVID Vaccines\n per 1000 vaccinated patients",  
+              "converted": "Patients Declining and later Receiving COVID Vaccines\n per 1000 patients recorded as declining",
+              "per_1000": "Patients Declining and later Receiving COVID Vaccines\n per 1000 patients"
     }
 
     if chart=="all": # plot 3 charts
