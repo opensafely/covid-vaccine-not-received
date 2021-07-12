@@ -43,7 +43,7 @@ def plot_hist(df=None, dfs= None, output_dir=None):
     # plot charts, either using supplied or generated `dfs`
     fig, axs = plt.subplots(1, 2, sharey=True, tight_layout=True)
     
-    for n, label in enumerate(dfs): 
+    for n, label in enumerate(dfs):
         dfp = dfs[label]          
         axs[n].bar(dfp.index, dfp[label])
         axs[n].set_xlabel("Rate per 1000")
@@ -52,8 +52,11 @@ def plot_hist(df=None, dfs= None, output_dir=None):
         for tick in axs[n].get_xticklabels():
             tick.set_rotation(90)
 
-        title = "COVID Vaccines "+ label.replace("_"," ").replace("decline", "declined\n").replace("vacc","vaccinated").title()+" Patients"
-        axs[n].set_title(title)
+        if "per_1000_vacc" in label:
+            title = "COVID Vaccines recorded as Declined\n per 1000 vaccinated priority patients"
+        else:
+            title = "COVID Vaccines recorded as Declined\n per 1000 priority patients"
+        axs[n].set_title(title, size=10)
 
     fig.savefig(f"{output_dir}/declines_by_practice_hist.png")
   
@@ -88,10 +91,10 @@ def plot_boxplot(df=None, backend=None, output_dir=None):
                 plotting_dict[l] = temp
         axs[n].boxplot(list(plotting_dict.values()))
         if "per_1000_vacc" in x:
-            title = "COVID Vaccines Declined per 1000 vaccinated patients\n in priority groups per practice"
+            title = "COVID Vaccines recorded as Declined per 1000 vaccinated patients\n in priority groups per practice"
             ylabel = "Rate per 1000"
         else:
-            title = "COVID Vaccines Declined\n per practice"
+            title = "COVID Vaccines recorded as Declined\n per practice"
             ylabel = "Vaccines Declined"
         axs[n].set_ylabel(ylabel)
         axs[n].set_title(title)
@@ -157,7 +160,7 @@ def plot_heatmap(df=None, dfs=None, backend=None, output_dir=None):
             ylabel = "Rate per 1000"
         else:
             title = "COVID Vaccines recorded as Declined\n per practice"
-            ylabel = "Vaccines Declined"
+            ylabel = "Declines Recorded"
 
         axs[n].set_ylabel(ylabel)
         axs[n].set_title(title)

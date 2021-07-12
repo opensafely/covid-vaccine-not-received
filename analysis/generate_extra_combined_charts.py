@@ -44,7 +44,7 @@ def plot_grouped_bar(backend="combined", output_dir="released_outputs/combined",
         df = df.loc[groups][["0-<2 weeks", "2-<4 weeks", "1-<2 months", ">=2 months"]]
 
         breakdown_title = breakdown.replace("_"," ").title().replace("Imd","IMD")
-        title = f'Length of time between a decline being recorded\n and a later vaccination, by priority group'
+        title = f'Length of time between a decline being recorded and\n later receiving a vaccination, by priority group'
         ylabel = "number of patients"
         width = 0.2 # the width of the bars
 
@@ -81,16 +81,17 @@ def plot_grouped_bar(backend="combined", output_dir="released_outputs/combined",
 
     fig.savefig(f"{output_dir}/additional_figures/{measure}_by_{breakdown}_by_priority_group.png", bbox_extra_artists=(legend,), bbox_inches='tight')
 
-base_path = f"released_outputs/combined"
 
 
-def plot_simple_bar(backend="combined", output_dir="released_outputs/combined"):
+def plot_simple_bar(backend="combined", output_dir="released_outputs/combined", exclude_other_group=True):
         
     df = pd.read_csv(f"released_outputs/{backend}/additional_figures/declined_then_accepted.csv", index_col=0)
     df = df[["converted"]]/10
     
     # reorder cohorts into priority order using list of cohorts
     groups = list(wave_column_headings[''].values())
+    if exclude_other_group==True:
+        groups.remove("Other")
     groups = [g for g in groups if g in df.index]
     df = df.transpose()[groups].transpose()
 
@@ -106,5 +107,3 @@ def plot_simple_bar(backend="combined", output_dir="released_outputs/combined"):
 
     fig.savefig(f"{output_dir}/additional_figures/declined_then_accepted_by_priority_group.png", bbox_inches='tight')
 
-
-plot_simple_bar(backend="combined", output_dir=base_path)

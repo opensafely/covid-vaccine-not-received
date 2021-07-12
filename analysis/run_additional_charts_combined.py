@@ -18,8 +18,6 @@ df2["decline_per_1000_vacc"] = df2["decline_per_1000_vacc"]/df2["decline_per_100
 df1["decline_per_1000_cumsum"] = df1.cumsum()
 df2["decline_per_1000_vacc_cumsum"] = df2.cumsum()
 
-print(df1, df2)
-
 # combine dfs into a dict
 dfs ={"decline_per_1000": df1,
       "decline_per_1000_vacc": df2}

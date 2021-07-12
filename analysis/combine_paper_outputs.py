@@ -57,9 +57,9 @@ def combine(emis_path, cumsums=True, indices=1):
             count_col = col.replace("_percent", "")
             combined_df[col] = (100*combined_df[count_col]/combined_df["total"]).round(1)
         if "declined_then_accepted" in emis_path: # calculate rates
-            combined_df["per_1000"] = (1000*combined_df["Declined then accepted"]/combined_df["total"]).round(2)
-            combined_df["per_1000_vacc"] = (1000*combined_df["Declined then accepted"]/combined_df["Vaccinated"]).round(2)
-            combined_df["converted"] = (1000*combined_df["Declined then accepted"]/combined_df["Declined - all"]).round(2)
+            combined_df["per_1000"] = (1000*combined_df["Declined then received"]/combined_df["total"]).round(2)
+            combined_df["per_1000_vacc"] = (1000*combined_df["Declined then received"]/combined_df["Vaccinated"]).round(2)
+            combined_df["converted"] = (1000*combined_df["Declined then received"]/combined_df["Declined - all"]).round(2)
         if "declined_accepted_weeks" in emis_path: # calculate percentages
             combined_df[f"{col}_percent"] = (100*combined_df[col]/combined_df.sum(axis=1)).round(3)
 

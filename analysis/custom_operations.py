@@ -29,7 +29,7 @@ group_names = {
     "decline_group":"Declined", 
     "decline_total_group":"Declined - all",
     "other_reason_group":"Other reason",
-    "declined_accepted_group": "Declined then accepted",
+    "declined_accepted_group": "Declined then received",
     "patient_id":"total"
     }
 
@@ -112,20 +112,20 @@ def declined_vaccinated(input_path="output/cohort.pickle", output_dir=out_path):
     cohort = cohort.rename(columns=group_names, index=wave_column_headings)
 
     cohort = cohort.assign(
-        per_1000 = 1000*cohort["Declined then accepted"]/cohort["total"],
-        per_1000_vacc = 1000*cohort["Declined then accepted"]/cohort["Vaccinated"],
-        converted = 1000*cohort["Declined then accepted"]/cohort["Declined - all"]
+        per_1000 = 1000*cohort["Declined then received"]/cohort["total"],
+        per_1000_vacc = 1000*cohort["Declined then received"]/cohort["Vaccinated"],
+        converted = 1000*cohort["Declined then received"]/cohort["Declined - all"]
     )
     
     fig, axs = plt.subplots(3, 1, sharex=True, tight_layout=True, figsize=(6,12))
     for n, x in enumerate(["per_1000", "per_1000_vacc", "converted"]):
         cohort[x].plot(kind='bar', stacked=True, ax=axs[n])
         if x=="per_1000_vacc":
-            title = "Patients Declining and later Accepting COVID Vaccines\n per 1000 vaccinated patients"  
+            title = "Patients Declining and later Receiving COVID Vaccines\n per 1000 vaccinated patients"  
         elif x=="converted":
-            title = "Patients Declining and later Accepting COVID Vaccines\n per 1000 patients who declined"
+            title = "Patients Declining and later Receiving COVID Vaccines\n per 1000 patients who declined"
         else:
-            title = "Patients Declining and later Accepting COVID Vaccines\n per 1000 patients"
+            title = "Patients Declining and later Receiving COVID Vaccines\n per 1000 patients"
         
         axs[n].set_ylabel("Rate per 1000")
         axs[n].set_title(title)

@@ -43,8 +43,8 @@ wave_column_headings = {"":
 
 title_starts = {
         "dose_1": "Vaccination Coverage",
-        "unreached": "People Not Reached",
-        "declined": "Vaccines declined"
+        "unreached": "People with No Vaccine Records",
+        "declined": "Vaccines recorded as Declined"
     }
 
 title_ends = {
@@ -55,7 +55,7 @@ title_ends = {
 
 subtitles = {
         "dose_1": "Vaccinated",
-        "unreached": "Unreached",
+        "unreached": "No Records",
         "declined": "Declined",
     }
 
@@ -188,7 +188,7 @@ def generate_summary_table_for_all(
     summary.to_csv(f"{tables_path}/all{group_type}_{key}.csv", float_format="%.1f%%")
 
 
-def generate_charts_for_all(in_path, charts_path, key, earliest_date, latest_date, title_end, group_type, waves):
+def generate_charts_for_all(in_path, charts_path, key, earliest_date, latest_date, title_end, group_type, waves, exclude_other_group=True):
     uptake = load_uptake(in_path, earliest_date, latest_date)
     if uptake.iloc[-2].max()>1_000_000:
         uptake_total = uptake.iloc[:-1] / 1_000_000
@@ -220,6 +220,8 @@ def generate_charts_for_all(in_path, charts_path, key, earliest_date, latest_dat
         [col for col in wave_column_headings[group_type] if col in uptake_pc.columns]
     ]
     uptake_pc.rename(columns=wave_column_headings[group_type], inplace=True)
+    if exclude_other_group==True:
+        uptake_pc = uptake_pc.drop("Other", 1)
     plot_chart(
         uptake_pc,
         f"Proportion of patients {title_end}",
@@ -361,7 +363,7 @@ def generate_charts_for_wave(
 
 
 def generate_stacked_charts_for_all(
-    base_path, out_path, earliest_date, latest_date, group_type
+    base_path, out_path, earliest_date, latest_date, group_type, exclude_other_group=True
 ):
     title = f"Vaccination and Decline rates\n for each cohort"
     labels = wave_column_headings[group_type]
@@ -387,13 +389,15 @@ def generate_stacked_charts_for_all(
     uptake_pc = compute_uptake_percent(uptake_by_group, labels)
     uptake_pc = uptake_pc[list(wave_column_headings[group_type].values())[2:]]
     uptake_pc = uptake_pc.rename(index=subtitles)
+    if exclude_other_group==True:
+        uptake_pc = uptake_pc.drop("Other", 1)
     uptake_pc = uptake_pc.transpose()
 
     # calculate the proportion with no vaccine for other reasons
-    uptake_pc["Inappropriate/unsuccessful"] = 100 - uptake_pc.sum(axis=1)
+    uptake_pc["Contraindicated/unsuccessful"] = 100 - uptake_pc.sum(axis=1)
 
     # reorder columns
-    uptake_pc = uptake_pc[["Vaccinated", "Declined", "Inappropriate/unsuccessful", "Unreached"]]
+    uptake_pc = uptake_pc[["Vaccinated", "Declined", "Contraindicated/unsuccessful", "No Records"]]
     
     plot_stacked_chart(
         uptake_pc, title, f"{out_path}/all_vaccinated_declined_by_group{group_type}.png"
@@ -433,9 +437,9 @@ def generate_stacked_charts_for_wave(
         
         
         # calculate the proportion with no vaccine for other reasons
-        uptake_pc["Inappropriate/unsuccessful"] = 100 - uptake_pc.sum(axis=1)
+        uptake_pc["Contraindicated/unsuccessful"] = 100 - uptake_pc.sum(axis=1)
         # reorder columns
-        uptake_pc = uptake_pc[["Vaccinated","Declined", "Inappropriate/unsuccessful", "Unreached"]]
+        uptake_pc = uptake_pc[["Vaccinated","Declined", "Contraindicated/unsuccessful", "No Records"]]
         
         plot_stacked_chart(
             uptake_pc, title, f"{out_path}/wave{group_type}_{wave}_{key}_{col}.png"
@@ -443,9 +447,9 @@ def generate_stacked_charts_for_wave(
         
         # also merge counts and percents to export to csv
         uptake_by_dem = uptake_by_dem.transpose().rename(index=labels, columns=subtitles)
-        uptake_by_dem["Inappropriate/unsuccessful"] = uptake_by_dem["total"] - uptake_by_dem["Vaccinated"] - uptake_by_dem["Unreached"] - uptake_by_dem["Declined"]
+        uptake_by_dem["Contraindicated/unsuccessful"] = uptake_by_dem["total"] - uptake_by_dem["Vaccinated"] - uptake_by_dem["No Records"] - uptake_by_dem["Declined"]
         uptake_pc = uptake_pc.add_suffix("_percent")
-        uptake_by_dem = uptake_by_dem[["total","Vaccinated", "Declined", "Inappropriate/unsuccessful", "Unreached"]]  
+        uptake_by_dem = uptake_by_dem[["total","Vaccinated", "Declined", "Contraindicated/unsuccessful", "No Records"]]  
         uptake_by_dem = pd.concat([uptake_by_dem, uptake_pc], axis=1)
         uptake_by_dem.to_csv(f"{base_path}/tables/wave{group_type}_{wave}_{key}_{col}.csv")
 
