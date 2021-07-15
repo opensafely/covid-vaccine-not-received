@@ -2,12 +2,10 @@
 ''' 
 
 import os
-from numpy.core.numeric import NaN
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.ticker import PercentFormatter
 from plot_practice_charts import *
+from ethnicities import high_level_ethnicities
 
 wave_column_headings = {
     "total": "All",
@@ -135,6 +133,66 @@ def declined_vaccinated(input_path="output/cohort.pickle", output_dir=out_path):
     fig.savefig(f"{output_dir}/all_declined_then_accepted_by_wave.png")
 
 
+
+def decl_acc_time_delay(input_path="output/cohort.pickle", output_dir=out_path):
+    '''
+    Measures the time between recorded decline and vaccination for each pt in the declined-then-accepted group,
+    and groups to number of weeks.
+    '''
+
+    cohort = pd.read_pickle(input_path)
+
+    # limit to priority groups (ages 50+ and clinical priority groups)
+    cohort = cohort.loc[cohort["wave"]!=0]
+
+    # filter to the declined-then-accepted group
+    cohort = cohort.loc[cohort["declined_accepted_group"]==1]
+    cohort = cohort[["wave", "declined_accepted_group", "patient_id", "vacc1_dat", "decl_first_dat", "high_level_ethnicity"]]
+    cohort["wave"] = cohort["wave"].astype(str)
+    # calculate no of days between recorded decline and vaccination.
+    cohort["date_diff"] = cohort["vacc1_dat"] - cohort['decl_first_dat']
+    
+    # bin the data
+    bins = [
+        pd.Timedelta(days = 0),
+        pd.Timedelta(days = 14),
+        pd.Timedelta(days = 28),
+        pd.Timedelta(weeks = 8),
+        pd.Timedelta(weeks = 120)
+        ]
+    labels = ["0-<2 weeks", "2-<4 weeks", "1-<2 months", ">=2 months"]
+
+    cohort["weeks_diff"] = pd.cut(cohort["date_diff"], bins=bins, labels=labels, retbins=False, include_lowest=True, right=False)
+    
+
+    # summarise for each group
+    cohort_a = cohort.groupby(["wave","weeks_diff"])["patient_id"].count()
+    cohort_a = cohort_a.rename(index=wave_column_headings)
+    
+    # low number suppression and rounding
+    cohort_a = cohort_a.replace([1,2,3,4,5,6], 0)
+    cohort_a = ((cohort_a // 7) * 7).astype(int)
+
+    cohort_a.to_csv(f"{output_dir}/declined_accepted_weeks_by_wave.csv")
+
+    
+    # look at priority groups split by demographics
+
+    cohort_b = cohort.copy()
+
+    # group by wave and ethnicity
+    cohort_b = cohort_b.groupby(["wave", "high_level_ethnicity","weeks_diff"])["patient_id"].count()
+ 
+    # rename column headers and indices (2 levels)
+    cohort_b = cohort_b.rename(index=high_level_ethnicities)
+    cohort_b = cohort_b.rename(index=wave_column_headings)
+
+    # low number suppression and rounding
+    cohort_b = cohort_b.replace([1,2,3,4,5,6], 0)
+    cohort_b = ((cohort_b // 7) * 7).astype(int)
+
+    cohort_b.to_csv(f"{output_dir}/declined_accepted_weeks_by_wave_and_ethnicity.csv")
+    
 
 def invert_df(df, group="all"):
     ''' "Inverts" df: 
