@@ -1,12 +1,11 @@
-# covid-vaccine-research-template
-This is a template with a premade study definition with some basic variables for research on the COVID vaccine. This could be used for vaccine monitoring or the starter project for vaccine efficacy. 
+# COVID Vaccines "Not Received"
+This project investigates the patterns of usage for codes indicative of patients declining a COVID vaccine, in combination with their vaccination status. In the unvaccinated, it also looks at other codes which may indicate a vaccination attempt or unsuitability for vaccination (e.g. contraindication). 
 
-# _title goes here_
 
-This is the code and configuration for our paper, _name goes here_
+This is the code and configuration for our paper, 'Recording of “COVID-19 vaccine declined” among vaccination priority groups: a cohort study on 57.9 million NHS patients’ primary care records in situ using OpenSAFELY'
 
-* The paper is [here]()
-* Raw model outputs, including charts, crosstabs, etc, are in `released_outputs/`
+* The preprint is [here]()
+* Outputs, including charts, and tables, are in `released_outputs/`
 * If you are interested in how we defined our variables, take a look at the [study definition](analysis/study_definition.py); this is written in `python`, but non-programmers should be able to understand what is going on there
 * If you are interested in how we defined our code lists, look in the [codelists folder](./codelists/).
 * Developers and epidemiologists interested in the framework should review [the OpenSAFELY documentation](https://docs.opensafely.org)
