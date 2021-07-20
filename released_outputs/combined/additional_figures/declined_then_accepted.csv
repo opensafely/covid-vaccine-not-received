@@ -1,4 +1,4 @@
-wave,Vaccinated,Declined then accepted,Declined - all,total,per_1000,per_1000_vacc,converted
+wave,Vaccinated,Declined then received,Declined - all,total,per_1000,per_1000_vacc,converted
 Other,8860817,10220,125685,23702000,0.43,1.15,81.31
 In care home,242697,1617,6335,252637,6.4,6.66,255.25
 80+,2467794,26530,86520,2578870,10.29,10.75,306.63

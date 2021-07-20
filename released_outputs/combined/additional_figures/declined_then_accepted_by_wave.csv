@@ -1,4 +1,4 @@
-wave,high_level_ethnicity,Vaccinated,Declined then accepted,Declined - all,total,per_1000,per_1000_vacc,converted
+wave,high_level_ethnicity,Vaccinated,Declined then received,Declined - all,total,per_1000,per_1000_vacc,converted
 Other,White,4852757,5180,65366,11471005,0.45,1.07,79.25
 Other,Mixed,120379,196,2954,435869,0.45,1.63,66.35
 Other,South Asian,736603,1141,8414,2017344,0.57,1.55,135.61
