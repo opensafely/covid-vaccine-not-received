@@ -1,3 +1,5 @@
+''' This function can be called to combine the cumulative coverage files between TPP and EMIS'''
+
 import pandas as pd
 
 

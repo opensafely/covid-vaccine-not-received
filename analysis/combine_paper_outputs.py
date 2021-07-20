@@ -1,7 +1,16 @@
+''' Combine cumulative coverage tables from EMIS and TPP; 
+also combines prevalence figures, practice summaries, and declined-then-received
+tables from EMIS and TPP that were derived separately.
+
+Additionally compiles summary files together (that have already been combined between TPP and EMIS),
+e.g. to show each wave broken down by ethncity in a single summary table. 
+'''
+
 import glob
 import os
 import pandas as pd
 import numpy as np
+from groups import groups, at_risk_groups
 
 pd.options.display.float_format = "{:,.2f}".format
 
@@ -31,7 +40,9 @@ def run():
 
     combine_multiple_waves()
     combine_multiple_waves(breakdown="imd_band",
-                        ix=["Unknown","1 (most deprived)","2","3","4","5 (least deprived)"])        
+                        ix=["Unknown","1 (most deprived)","2","3","4","5 (least deprived)"])     
+
+    summary_tables()   
 
 
 def combine(emis_path, cumsums=True, indices=1):
@@ -69,7 +80,7 @@ def combine(emis_path, cumsums=True, indices=1):
 
 def combine_multiple_waves(breakdown="high_level_ethnicity",
                             ix=["White","Mixed","South Asian", "Black", "Other", "Unknown"]):
-    # create table of percent declined by ethnicity across all cohorts
+    # create table of "percent declined" by ethnicity across all cohorts
     base_path = "released_outputs/combined/tables/"
 
     df = pd.DataFrame(index=ix)
@@ -84,5 +95,37 @@ def combine_multiple_waves(breakdown="high_level_ethnicity",
 
         df = df.join(df1[[group]])
     df.to_csv(f"{base_path}waves_1_9_declined_{breakdown}.csv")
+
+
+def summary_tables():
+    '''create summary table for each of the 3 combined cohorts'''
+    base_path = 'released_outputs/combined/tables'
+
+    # create a lookup for group names by combining the two imported dicts
+    groups.update(at_risk_groups)
+    demographics = {"age_band": "Age Band", 'sex':'Sex', 'high_level_ethnicity': 'High Level Ethnicity', 'imd_band': 'IMD Band'}
+    groups.update(demographics)
+
+    for wave in {'1':'65+','2':'CEV/At Risk','3':'50-64'}:
+        df_out = pd.DataFrame()
+        for key in ['age_band', 'sex', 'high_level_ethnicity', 'imd_band', 'preg_group', 'sevment_group', 'learndis_group']:
+            if (key == 'preg_group') & (wave != '2'):
+                continue
+            elif (wave == '3') & ((key == 'learndis_group') | (key == 'sevment_group')):
+                continue
+            df = pd.read_csv(f"{base_path}/wave2_{wave}_declined_{key}.csv", index_col=0)
+            
+            df['Category'] = groups[key]
+            df = df.set_index('Category', append=True).swaplevel()
+            
+            df_out = pd.concat([df_out, df])
+        
+        for c in ['total', 'Vaccinated','Declined','Contraindicated/unsuccessful','No Records']:
+            if c == 'total':
+                df_out[c] = df_out[c].astype(int).apply('{:,}'.format)
+            else:
+                df_out[f"{c} (% of total)"] = df_out[c].astype(int).apply('{:,}'.format) + " (" + df_out[f"{c}_percent"].apply('{:.2f}'.format) + "%)" 
+                df_out.drop([c, f"{c}_percent"], 1, inplace=True)
+            df_out.to_csv(f'{base_path}/wave2_{wave}_summary.csv', float_format='%.2f')
 
 run()
