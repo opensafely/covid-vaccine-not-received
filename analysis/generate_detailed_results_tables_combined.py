@@ -25,10 +25,10 @@ for wave in {'1':'65+','2':'CEV/At Risk','3':'50-64'}:
     
     for c in ['total', 'Vaccinated','Declined','Contraindicated/unsuccessful','No Records']:
         if c == 'total':
-            df_out[c] = df_out[c].astype(int)
+            df_out[c] = df_out[c].astype(int).apply('{:,}'.format)
         else:
-            df_out[f"{c} (% of total)"] = df_out[c].astype(int).astype(str) + " (" + df_out[f"{c}_percent"].round(2).astype(str) + "%)" 
+            df_out[f"{c} (% of total)"] = df_out[c].astype(int).apply('{:,}'.format) + " (" + df_out[f"{c}_percent"].apply('{:.2f}'.format) + "%)" 
             df_out.drop([c, f"{c}_percent"], 1, inplace=True)
         
     print(df_out)
-    df_out.to_csv(f'{base_path}/wave_{wave}_summary.csv', float_format='%.2f')
+    df_out.to_csv(f'{base_path}/wave2_{wave}_summary.csv', float_format='%.2f')
