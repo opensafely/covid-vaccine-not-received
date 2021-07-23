@@ -31,7 +31,7 @@ def plot_grouped_bar(backend="combined", output_dir="released_outputs/combined",
         df = df.transpose()[groups]
         
         # summary statistics for south asian vs other ethnicities
-        df_summary = df0.copy()[["Declined then accepted", "Declined - all"]].swaplevel()
+        df_summary = df0.copy()[["Declined then received", "Declined - all"]].swaplevel()
         # set up df to export results
         ind = pd.MultiIndex.from_tuples([], names=(u'Ethnicity', u'Group'))
         results = pd.DataFrame(columns=['Declined then received', 'Declined - all', 'percent'], index=ind)
@@ -48,7 +48,7 @@ def plot_grouped_bar(backend="combined", output_dir="released_outputs/combined",
 
             for wave_group in regroups:
                 out = df_2.loc[regroups[wave_group]].sum() # sum across priority groups
-                total1 = out["Declined then accepted"]
+                total1 = out["Declined then received"]
                 total2 = out["Declined - all"]
                 out = 100*(total1/total2).round(3)
                 # save results to dataframe
