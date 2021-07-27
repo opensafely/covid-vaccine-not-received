@@ -498,6 +498,7 @@
       * [output/tpp/additional_figures/declined_accepted_weeks_by_wave_and_ethnicity.csv](output/tpp/additional_figures/declined_accepted_weeks_by_wave_and_ethnicity.csv)
       * [output/tpp/additional_figures/declined_then_accepted.csv](output/tpp/additional_figures/declined_then_accepted.csv)
       * [output/tpp/additional_figures/declined_then_accepted_by_wave.csv](output/tpp/additional_figures/declined_then_accepted_by_wave.csv)
+      * [output/tpp/additional_figures/declines_by_practice_heatmap.png](output/tpp/additional_figures/declines_by_practice_heatmap.png)
       * [output/tpp/additional_figures/practice_decline_summary.csv](output/tpp/additional_figures/practice_decline_summary.csv)
       * [output/tpp/additional_figures/practice_list_size_decline_per_1000.csv](output/tpp/additional_figures/practice_list_size_decline_per_1000.csv)
       * [output/tpp/additional_figures/practice_list_size_decline_per_1000_vacc.csv](output/tpp/additional_figures/practice_list_size_decline_per_1000_vacc.csv)
