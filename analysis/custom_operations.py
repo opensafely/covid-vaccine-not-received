@@ -182,8 +182,11 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
                 plotting = out.groupby([f"{x}_binned","prac_size"])[["patient_count"]].count().unstack()
                 plotting.columns = plotting.columns.droplevel()
 
+                # replace low numbers with 2 
+                plotting = plotting.replace([1,2,3], 2)
+                
                 # export csv
-                plotting.replace([0,1,2,3],np.NaN).to_csv(f'{output_dir}/practice_list_size_{x}.csv')
+                plotting.to_csv(f'{output_dir}/practice_list_size_{x}.csv')
 
                 # plot heat map
                 im = axs[n].imshow(plotting, cmap='RdPu', interpolation='nearest')
