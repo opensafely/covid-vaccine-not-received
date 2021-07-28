@@ -74,7 +74,7 @@ def plot_boxplot(df=None, backend=None, output_dir=None):
         bins = [0, 10, 15, 20, 25, 100]
         labels = [str(a)+"-<"+str(b) for (a,b) in zip(bins[:-1], bins[1:])]
     else:
-        bins = [0, 1_500, 2_000, 2_500, 3_000, 4_000, 5_000, 6_000, 7_000, 10_000, 100_000]
+        bins = [250, 1_500, 2_000, 2_500, 3_000, 4_000, 5_000, 6_000, 7_000, 10_000, 100_000]
         labels = [str(round(a/1000,1))+"k-<"+str(round(b/1000,1))+"k" for (a,b) in zip(bins[:-1], bins[1:])]
     out["prac_size"] = pd.cut(out["patient_count"], bins=bins, labels=labels, retbins=False, include_lowest=True, right=False)
 
@@ -144,15 +144,19 @@ def plot_heatmap(df=None, dfs=None, backend=None, output_dir=None):
             plotting.replace([0,1,2,3],np.NaN).to_csv(f'{output_dir}/practice_list_size_2_{x}.csv')
             dfs[x] = plotting
 
-    fig, axs = plt.subplots(2, 1, tight_layout=True, figsize=(6,8))
+    fig, axs = plt.subplots(len(dfs), 1, tight_layout=True, figsize=(6,8))
     
     for n, label in enumerate(dfs):
+        if len(dfs)>1:
+            ax = axs[n]
+        else:
+            ax = axs
         plotting = dfs[label]
         # plot heat map
-        im = axs[n].imshow(plotting, cmap='RdPu', interpolation='nearest')
+        im = ax.imshow(plotting, cmap='RdPu', interpolation='nearest')
 
         # Create colorbar
-        fig.colorbar(im, ax=axs[n])
+        fig.colorbar(im, ax=ax)
         #cbar.ax.set_ylabel("no of practices", ax=axs[n], rotation=-90, va="bottom")
 
         if "per_1000" in label:
@@ -162,19 +166,19 @@ def plot_heatmap(df=None, dfs=None, backend=None, output_dir=None):
             title = "COVID Vaccines recorded as Declined\n per practice"
             ylabel = "Declines Recorded"
 
-        axs[n].set_ylabel(ylabel)
-        axs[n].set_title(title)
+        ax.set_ylabel(ylabel)
+        ax.set_title(title)
         # We want to show all ticks...
         yticks = np.arange(len(plotting.index))
         # (adjust location of yticks to bottom of each category)
         yticks = [k-yticks[1]/2 for k in yticks]
-        axs[n].set_xticks(np.arange(len(plotting.columns)))
-        axs[n].set_yticks(yticks)
+        ax.set_xticks(np.arange(len(plotting.columns)))
+        ax.set_yticks(yticks)
         # ... and label them with the respective list entries
-        axs[n].set_xticklabels(plotting.columns, rotation=90)
-        axs[n].set_yticklabels(plotting.index)  
-        axs[n].invert_yaxis()
-        axs[1].set_xlabel("Practice population size")
+        ax.set_xticklabels(plotting.columns, rotation=90)
+        ax.set_yticklabels(plotting.index)  
+        ax.invert_yaxis()
+        ax.set_xlabel("Practice population size")
 
     fig.savefig(f"{output_dir}/declines_by_practice_heatmap.png")
 

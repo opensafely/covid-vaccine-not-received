@@ -29,6 +29,8 @@ plot_grouped_bar(backend=backend, output_dir=base_path, measure="declined_then_a
 # load data and set index
 df1 = pd.read_csv(base_path+"/additional_figures/practice_list_size_decline_per_1000.csv", index_col=0)
 df2 = pd.read_csv(base_path+"/additional_figures/practice_list_size_decline_per_1000_vacc.csv", index_col=0)
+# for heatmap:
+df3 = pd.read_csv(base_path+"/additional_figures/practice_list_size_2_decline_per_1000_vacc.csv", index_col=0)
 
 # convert summed counts to proportions
 df1["decline_per_1000"] = df1["decline_per_1000"]/df1["decline_per_1000"].sum()
@@ -38,11 +40,13 @@ df1["decline_per_1000_cumsum"] = df1.cumsum()
 df2["decline_per_1000_vacc_cumsum"] = df2.cumsum()
 
 # combine dfs into a dict
-dfs ={"decline_per_1000": df1,
+dfs_hist ={"decline_per_1000": df1,
       "decline_per_1000_vacc": df2}
+dfs_heat ={"decline_per_1000_vacc": df3}
 
 # create practice charts
-plot_hist(dfs=dfs, output_dir=base_path+"/additional_figures")
+plot_hist(dfs=dfs_hist, output_dir=base_path+"/additional_figures")
+plot_heatmap(dfs=dfs_heat, output_dir=base_path+"/additional_figures")
 
 # create summary chart of patients declining then accepting vaccines, by priority group
-declined_vaccinated()
+#declined_vaccinated()
