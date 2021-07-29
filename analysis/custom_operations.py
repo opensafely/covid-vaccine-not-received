@@ -128,7 +128,7 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
                 labels = [str(a)+"-<"+str(b) for (a,b) in zip(bins[:-1], bins[1:])]
             else:
                 bins = [250, 750, 1_000, 1_250, 1_500, 1_750, 2_000, 2_250, 2_500, 2_750, 3_000, 3_250, 3_500, 3_750, 4_000,
-                        4_330, 4_660, 5_000, 5_330, 5_660, 6_000, 6_500, 7_000, 8_500, 10_000, 100_000]
+                        4_330, 4_660, 5_000, 5_330, 5_660, 6_000, 6_500, 7_000, 8_000, 10_000, 100_000]
                 labels = ["<"+str(f'{b:,}') for b in bins[1:]]
                 labels[-2] = "<"+str(int(bins[-2]/1000))+"k"
                 labels[-1] = ">="+str(int(bins[-2]/1000))+"k"
@@ -173,7 +173,7 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
                     edges = [round(x,1) for x in edges]
                 else:
                     #bins[0] = [0, 20, 40, 60, 80, 100, 120, 140, 160, 2000]
-                    bins = [0, 5, 10, 15, 20, 25, 30, 35, 40, 50, 75, 100, 1000]
+                    bins = [0, 5, 10, 15, 20, 25, 30, 35, 40, 50, 60, 100, 1000]
                     _, edges = pd.cut(out[x], bins=bins, retbins=True)
                     edges = [int(x) for x in edges]
 
@@ -198,7 +198,8 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
                 if "per_1000" in x:
                     ylabel = "Rate per 1000"
                     title = "COVID Vaccines recorded as Declined\n per 1000 patients in priority groups\n per practice"
-                if "per_1000_vacc" in x:
+                elif "per_1000_vacc" in x:
+                    ylabel = "Rate per 1000"
                     title = "COVID Vaccines recorded as Declined\n per 1000 _vaccinated_ patients in priority groups\n per practice"
                 else:
                     title = "COVID Vaccines recorded as Declined\n per practice"
