@@ -127,10 +127,10 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
                 bins = [0, 10, 15, 20, 25, 100]
                 labels = [str(a)+"-<"+str(b) for (a,b) in zip(bins[:-1], bins[1:])]
             else:
-                bins = [250, 500, 750, 1_000, 1_250, 1_500, 1_750, 2_000, 2_250, 2_500, 2_750, 3_000, 
-                        3_250, 3_500, 3_750, 4_000, 4_500, 5_000, 5_500, 6_000, 7_000, 10_000, 100_000]
+                bins = [250, 750, 1_000, 1_250, 1_500, 1_750, 2_000, 2_250, 2_500, 2_750, 3_000, 3_250, 3_500, 3_750, 4_000,
+                        4_330, 4_660, 5_000, 5_330, 5_660, 6_000, 6_500, 7_000, 8_500, 10_000, 100_000]
                 labels = ["<"+str(f'{b:,}') for b in bins[1:]]
-                labels[20:] = ["<"+str(int(b/1000))+"k" for (b) in bins[21:]]
+                labels[-2] = "<"+str(int(bins[-2]/1000))+"k"
                 labels[-1] = ">="+str(int(bins[-2]/1000))+"k"
             out["prac_size"] = pd.cut(out["patient_count"], bins=bins, labels=labels, retbins=False, include_lowest=True, right=False)
             
@@ -164,27 +164,27 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
         if plot_type=="heatmap":
             
             fig, axs = plt.subplots(2, 1, tight_layout=True, figsize=(6,8))
-            for n, x in enumerate(["decline_group", "decline_per_1000_vacc"]):
-                bins = {}
+            for n, x in enumerate(["decline_per_1000", "decline_per_1000_vacc"]):
+                #bins = {}
                 if backend=="expectations":
-                    bins[0] = [0, 2, 4, 6, 8, 20]
-                    bins[1] = [0, 1, 2, 3, 4]
-                    _, edges = pd.cut(out[x], bins=bins[n], retbins=True)
+                    #bins[0] = [0, 2, 4, 6, 8, 20]
+                    bins = [0, 1, 2, 3, 4]
+                    _, edges = pd.cut(out[x], bins=bins, retbins=True)
                     edges = [round(x,1) for x in edges]
                 else:
-                    bins[0] = [0, 20, 40, 60, 80, 100, 120, 140, 160, 2000]
-                    bins[1] = [0, 5, 10, 15, 20, 25, 30, 35, 40, 50, 100, 1000]
-                    _, edges = pd.cut(out[x], bins=bins[n], retbins=True)
+                    #bins[0] = [0, 20, 40, 60, 80, 100, 120, 140, 160, 2000]
+                    bins = [0, 5, 10, 15, 20, 25, 30, 35, 40, 50, 75, 100, 1000]
+                    _, edges = pd.cut(out[x], bins=bins, retbins=True)
                     edges = [int(x) for x in edges]
 
-                out[f"{x}_binned"] = pd.cut(out[x], bins=bins[n], labels=edges[:-1], retbins=False, include_lowest=True)
+                out[f"{x}_binned"] = pd.cut(out[x], bins=bins, labels=edges[:-1], retbins=False, include_lowest=True)
 
                 plotting = out.groupby([f"{x}_binned","prac_size"])[["patient_count"]].count().unstack()
                 plotting.columns = plotting.columns.droplevel()
 
                 # replace low numbers with 2 
                 plotting = plotting.replace([1,2,3], 2)
-                
+
                 # export csv
                 plotting.to_csv(f'{output_dir}/practice_list_size_{x}.csv')
 
@@ -196,8 +196,10 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
                 #cbar.ax.set_ylabel("no of practices", ax=axs[n], rotation=-90, va="bottom")
 
                 if "per_1000" in x:
-                    title = "COVID Vaccines recorded as Declined\n per 1000 vaccinated patients in priority groups\n per practice"
                     ylabel = "Rate per 1000"
+                    title = "COVID Vaccines recorded as Declined\n per 1000 patients in priority groups\n per practice"
+                if "per_1000_vacc" in x:
+                    title = "COVID Vaccines recorded as Declined\n per 1000 _vaccinated_ patients in priority groups\n per practice"
                 else:
                     title = "COVID Vaccines recorded as Declined\n per practice"
                     ylabel = "Vaccines Recorded as Declined"
