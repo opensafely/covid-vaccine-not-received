@@ -499,7 +499,10 @@
       * [output/tpp/additional_figures/declined_then_accepted.csv](output/tpp/additional_figures/declined_then_accepted.csv)
       * [output/tpp/additional_figures/declined_then_accepted_by_wave.csv](output/tpp/additional_figures/declined_then_accepted_by_wave.csv)
       * [output/tpp/additional_figures/declines_by_practice_heatmap.png](output/tpp/additional_figures/declines_by_practice_heatmap.png)
+      * [output/tpp/additional_figures/practice_counts_decline_per_1000.csv](output/tpp/additional_figures/practice_counts_decline_per_1000.csv)
+      * [output/tpp/additional_figures/practice_counts_decline_per_1000_vacc.csv](output/tpp/additional_figures/practice_counts_decline_per_1000_vacc.csv)
       * [output/tpp/additional_figures/practice_decline_summary.csv](output/tpp/additional_figures/practice_decline_summary.csv)
+      * [output/tpp/additional_figures/practice_list_size_decline_per_1000.csv](output/tpp/additional_figures/practice_list_size_decline_per_1000.csv)
     * output/tpp/cumulative_coverage
       * output/tpp/cumulative_coverage/all
         * output/tpp/cumulative_coverage/all/any_vaccine_record
