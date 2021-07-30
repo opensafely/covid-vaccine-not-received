@@ -1,8 +1,4 @@
 wave,weeks_diff,patient_id
-Other,0-<2 weeks,2814
-Other,2-<4 weeks,1001
-Other,1-<2 months,1036
-Other,>=2 months,602
 In care home,0-<2 weeks,196
 In care home,2-<4 weeks,168
 In care home,1-<2 months,280
