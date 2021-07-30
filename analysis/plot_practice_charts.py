@@ -117,8 +117,11 @@ def plot_heatmap(df=None, dfs=None, backend=None, output_dir=None):
             bins = [0, 10, 15, 20, 25, 100]
             labels = [str(a)+"-<"+str(b) for (a,b) in zip(bins[:-1], bins[1:])]
         else:
-            bins = [0, 1_500, 2_000, 2_500, 3_000, 4_000, 5_000, 6_000, 7_000, 10_000, 100_000]
-            labels = [str(round(a/1000,1))+"k-<"+str(round(b/1000,1))+"k" for (a,b) in zip(bins[:-1], bins[1:])]
+            bins = [250, 750, 1_000, 1_250, 1_500, 1_750, 2_000, 2_250, 2_500, 2_750, 3_000, 3_250, 3_500, 3_750, 4_000,
+                    4_330, 4_660, 5_000, 5_330, 5_660, 6_000, 6_500, 7_000, 8_000, 10_000, 100_000]
+            labels = ["<"+str(f'{b:,}') for b in bins[1:]]
+            labels[-2] = "<"+str(int(bins[-2]/1000))+"k"
+            labels[-1] = ">="+str(int(bins[-2]/1000))+"k"
         out["prac_size"] = pd.cut(out["patient_count"], bins=bins, labels=labels, retbins=False, include_lowest=True, right=False)
 
         dfs = {}
@@ -144,7 +147,7 @@ def plot_heatmap(df=None, dfs=None, backend=None, output_dir=None):
             plotting.replace([0,1,2,3],np.NaN).to_csv(f'{output_dir}/practice_list_size_2_{x}.csv')
             dfs[x] = plotting
 
-    fig, axs = plt.subplots(len(dfs), 1, tight_layout=True, figsize=(6,8))
+    fig, axs = plt.subplots(len(dfs), 1, tight_layout=True, figsize=(6,len(dfs)*4))
     
     for n, label in enumerate(dfs):
         if len(dfs)>1:
@@ -159,12 +162,15 @@ def plot_heatmap(df=None, dfs=None, backend=None, output_dir=None):
         fig.colorbar(im, ax=ax)
         #cbar.ax.set_ylabel("no of practices", ax=axs[n], rotation=-90, va="bottom")
 
-        if "per_1000" in label:
-            title = "COVID Vaccines recorded as Declined\n per 1000 vaccinated patients in priority groups\n per practice"
+        if "per_1000_vacc" in label:
             ylabel = "Rate per 1000"
+            title = "COVID Vaccines recorded as Declined\n per 1000 _vaccinated_ patients in priority groups\n per practice"
+        elif "per_1000" in label:
+            ylabel = "Rate per 1000"
+            title = "COVID Vaccines recorded as Declined\n per 1000 patients in priority groups\n per practice"
         else:
             title = "COVID Vaccines recorded as Declined\n per practice"
-            ylabel = "Declines Recorded"
+            ylabel = "Vaccines Recorded as Declined"
 
         ax.set_ylabel(ylabel)
         ax.set_title(title)
@@ -178,7 +184,7 @@ def plot_heatmap(df=None, dfs=None, backend=None, output_dir=None):
         ax.set_xticklabels(plotting.columns, rotation=90)
         ax.set_yticklabels(plotting.index)  
         ax.invert_yaxis()
-        ax.set_xlabel("Practice population size")
+        ax.set_xlabel("N patients in priority groups")
 
     fig.savefig(f"{output_dir}/declines_by_practice_heatmap.png")
 
