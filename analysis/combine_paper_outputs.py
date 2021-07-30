@@ -15,13 +15,12 @@ from combine_cumsums import combine_cumsums
 def run():
     # combine cumulative sums
     for emis_path in sorted(
-          glob.glob("released_outputs/emis/cumulative_coverage/*/*/*.csv")
-      ):
-       combine(emis_path, cumsums=True)
+         glob.glob("released_outputs/emis/cumulative_coverage/*/*/*.csv")
+     ):
+      combine(emis_path, cumsums=True)
 
     # combine other files
     for emis_path in ["released_outputs/emis/tables/prevalences.csv",
-            "released_outputs/emis/additional_figures/practice_decline_summary.csv",
             "released_outputs/emis/additional_figures/declined_then_accepted.csv"]:
         combine(emis_path, cumsums=False)
 
@@ -29,8 +28,9 @@ def run():
             "released_outputs/emis/additional_figures/declined_accepted_weeks_by_wave.csv"]:
         combine(emis_path, cumsums=False, indices=2)
 
+    # practice summaries
     for emis_path in (
-        glob.glob("released_outputs/emis/additional_figures/practice_list_size*.csv")):
+        glob.glob("released_outputs/emis/additional_figures/practice_*.csv")):
         combine(emis_path, cumsums=False)
     
 
