@@ -1,0 +1,37 @@
+wave,weeks_diff,patient_id
+In care home,0-<2 weeks,196
+In care home,2-<4 weeks,168
+In care home,1-<2 months,280
+In care home,>=2 months,287
+80+,0-<2 weeks,3661
+80+,2-<4 weeks,3073
+80+,1-<2 months,5271
+80+,>=2 months,3283
+70-79,0-<2 weeks,7609
+70-79,2-<4 weeks,3017
+70-79,1-<2 months,3612
+70-79,>=2 months,2275
+CEV,0-<2 weeks,2877
+CEV,2-<4 weeks,2009
+CEV,1-<2 months,2716
+CEV,>=2 months,1687
+65-69,0-<2 weeks,1652
+65-69,2-<4 weeks,980
+65-69,1-<2 months,1267
+65-69,>=2 months,658
+At risk,0-<2 weeks,3990
+At risk,2-<4 weeks,2037
+At risk,1-<2 months,2289
+At risk,>=2 months,1204
+60-64,0-<2 weeks,2177
+60-64,2-<4 weeks,602
+60-64,1-<2 months,560
+60-64,>=2 months,252
+55-59,0-<2 weeks,5572
+55-59,2-<4 weeks,777
+55-59,1-<2 months,644
+55-59,>=2 months,252
+50-54,0-<2 weeks,3731
+50-54,2-<4 weeks,721
+50-54,1-<2 months,686
+50-54,>=2 months,294
