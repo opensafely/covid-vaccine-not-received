@@ -5,15 +5,15 @@
   * output/emis
     * output/emis/additional_figures
       * [output/emis/additional_figures/all_declined_then_accepted_by_wave.png](output/emis/additional_figures/all_declined_then_accepted_by_wave.png)
+      * [output/emis/additional_figures/declined_accepted_weeks_by_wave.csv](output/emis/additional_figures/declined_accepted_weeks_by_wave.csv)
       * [output/emis/additional_figures/declined_then_accepted.csv](output/emis/additional_figures/declined_then_accepted.csv)
       * [output/emis/additional_figures/declined_then_accepted_by_wave.csv](output/emis/additional_figures/declined_then_accepted_by_wave.csv)
       * [output/emis/additional_figures/declines_by_practice_heatmap.png](output/emis/additional_figures/declines_by_practice_heatmap.png)
       * [output/emis/additional_figures/declines_by_practice_hist.png](output/emis/additional_figures/declines_by_practice_hist.png)
+      * [output/emis/additional_figures/practice_counts_decline_per_1000.csv](output/emis/additional_figures/practice_counts_decline_per_1000.csv)
+      * [output/emis/additional_figures/practice_counts_decline_per_1000_vacc.csv](output/emis/additional_figures/practice_counts_decline_per_1000_vacc.csv)
       * [output/emis/additional_figures/practice_decline_summary.csv](output/emis/additional_figures/practice_decline_summary.csv)
-      * [output/emis/additional_figures/practice_list_size_2_decline_group.csv](output/emis/additional_figures/practice_list_size_2_decline_group.csv)
-      * [output/emis/additional_figures/practice_list_size_2_decline_per_1000_vacc.csv](output/emis/additional_figures/practice_list_size_2_decline_per_1000_vacc.csv)
       * [output/emis/additional_figures/practice_list_size_decline_per_1000.csv](output/emis/additional_figures/practice_list_size_decline_per_1000.csv)
-      * [output/emis/additional_figures/practice_list_size_decline_per_1000_vacc.csv](output/emis/additional_figures/practice_list_size_decline_per_1000_vacc.csv)
     * output/emis/charts
       * [output/emis/charts/all_declined_percent.png](output/emis/charts/all_declined_percent.png)
       * [output/emis/charts/group2_1_declined_high_level_ethnicity.png](output/emis/charts/group2_1_declined_high_level_ethnicity.png)
@@ -500,8 +500,6 @@
       * [output/tpp/additional_figures/declined_then_accepted_by_wave.csv](output/tpp/additional_figures/declined_then_accepted_by_wave.csv)
       * [output/tpp/additional_figures/declines_by_practice_heatmap.png](output/tpp/additional_figures/declines_by_practice_heatmap.png)
       * [output/tpp/additional_figures/practice_decline_summary.csv](output/tpp/additional_figures/practice_decline_summary.csv)
-      * [output/tpp/additional_figures/practice_list_size_decline_per_1000.csv](output/tpp/additional_figures/practice_list_size_decline_per_1000.csv)
-      * [output/tpp/additional_figures/practice_list_size_decline_per_1000_vacc.csv](output/tpp/additional_figures/practice_list_size_decline_per_1000_vacc.csv)
     * output/tpp/cumulative_coverage
       * output/tpp/cumulative_coverage/all
         * output/tpp/cumulative_coverage/all/any_vaccine_record
