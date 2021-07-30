@@ -163,61 +163,58 @@ def practice_variation(input_path="output/cohort.pickle", output_dir=out_path):
 
         if plot_type=="heatmap":
             
-            fig, axs = plt.subplots(2, 1, tight_layout=True, figsize=(6,8))
-            for n, x in enumerate(["decline_per_1000", "decline_per_1000_vacc"]):
-                #bins = {}
-                if backend=="expectations":
-                    #bins[0] = [0, 2, 4, 6, 8, 20]
-                    bins = [0, 1, 2, 3, 4]
-                    _, edges = pd.cut(out[x], bins=bins, retbins=True)
-                    edges = [round(x,1) for x in edges]
-                else:
-                    #bins[0] = [0, 20, 40, 60, 80, 100, 120, 140, 160, 2000]
-                    bins = [0, 5, 10, 15, 20, 25, 30, 35, 40, 50, 60, 100, 1000]
-                    _, edges = pd.cut(out[x], bins=bins, retbins=True)
-                    edges = [int(x) for x in edges]
+            fig, ax = plt.subplots(figsize=(6,6))
+            m = "decline_per_1000"
+            if backend=="expectations":
+                bins = [0, 1, 2, 3, 4]
+                _, edges = pd.cut(out[m], bins=bins, retbins=True)
+                edges = [round(x,1) for x in edges]
+            else:
+                bins = [0, 5, 10, 15, 20, 25, 30, 35, 40, 50, 60, 100, 1000]
+                _, edges = pd.cut(out[m], bins=bins, retbins=True)
+                edges = [int(x) for x in edges]
 
-                out[f"{x}_binned"] = pd.cut(out[x], bins=bins, labels=edges[:-1], retbins=False, include_lowest=True)
+            out[f"{m}_binned"] = pd.cut(out[m], bins=bins, labels=edges[:-1], retbins=False, include_lowest=True)
 
-                plotting = out.groupby([f"{x}_binned","prac_size"])[["patient_count"]].count().unstack()
-                plotting.columns = plotting.columns.droplevel()
+            plotting = out.groupby([f"{m}_binned","prac_size"])[["patient_count"]].count().unstack()
+            plotting.columns = plotting.columns.droplevel()
 
-                # replace low numbers with 2 
-                plotting = plotting.replace([1,2,3], 2)
+            # replace low numbers with 2 
+            plotting = plotting.replace([1,2,3], 2)
 
-                # export csv
-                plotting.to_csv(f'{output_dir}/practice_list_size_{x}.csv')
+            # export csv
+            plotting.to_csv(f'{output_dir}/practice_list_size_{m}.csv')
 
-                # plot heat map
-                im = axs[n].imshow(plotting, cmap='RdPu', interpolation='nearest')
+            # plot heat map
+            im = ax.imshow(plotting, cmap='RdPu', interpolation='nearest')
 
-                # Create colorbar
-                fig.colorbar(im, ax=axs[n])
-                #cbar.ax.set_ylabel("no of practices", ax=axs[n], rotation=-90, va="bottom")
+            # Create colorbar
+            fig.colorbar(im, ax=ax)
+            #cbar.ax.set_ylabel("no of practices", ax=axs[n], rotation=-90, va="bottom")
 
-                if "per_1000" in x:
-                    ylabel = "Rate per 1000"
-                    title = "COVID Vaccines recorded as Declined\n per 1000 patients in priority groups\n per practice"
-                elif "per_1000_vacc" in x:
-                    ylabel = "Rate per 1000"
-                    title = "COVID Vaccines recorded as Declined\n per 1000 _vaccinated_ patients in priority groups\n per practice"
-                else:
-                    title = "COVID Vaccines recorded as Declined\n per practice"
-                    ylabel = "Vaccines Recorded as Declined"
+            if "per_1000_vacc" in m:
+                ylabel = "Rate per 1000"
+                title = "COVID Vaccines recorded as Declined\n per 1000 _vaccinated_ patients in priority groups\n per practice"
+            elif "per_1000" in m:
+                ylabel = "Rate per 1000"
+                title = "COVID Vaccines recorded as Declined\n per 1000 patients in priority groups\n per practice"
+            else:
+                title = "COVID Vaccines recorded as Declined\n per practice"
+                ylabel = "Vaccines Recorded as Declined"
 
-                axs[n].set_ylabel(ylabel)
-                axs[n].set_title(title)
-                # We want to show all ticks...
-                yticks = np.arange(len(plotting.index))
-                # (adjust location of yticks to bottom of each category)
-                yticks = [k-yticks[1]/2 for k in yticks]
-                axs[n].set_xticks(np.arange(len(plotting.columns)))
-                axs[n].set_yticks(yticks)
-                # ... and label them with the respective list entries
-                axs[n].set_xticklabels(plotting.columns, rotation=90)
-                axs[n].set_yticklabels(plotting.index)  
-                axs[n].invert_yaxis()
-            axs[1].set_xlabel("Practice population size")
+            ax.set_ylabel(ylabel)
+            ax.set_title(title)
+            # We want to show all ticks...
+            yticks = np.arange(len(plotting.index))
+            # (adjust location of yticks to bottom of each category)
+            yticks = [k-yticks[1]/2 for k in yticks]
+            ax.set_xticks(np.arange(len(plotting.columns)))
+            ax.set_yticks(yticks)
+            # ... and label them with the respective list entries
+            ax.set_xticklabels(plotting.columns, rotation=90)
+            ax.set_yticklabels(plotting.index)  
+            ax.invert_yaxis()
+            ax.set_xlabel("N patients in priority groups")
 
         fig.savefig(f"{output_dir}/declines_by_practice_{plot_type}.png")
 
