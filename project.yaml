@@ -1,7 +1,7 @@
 version: '3.0'
 
 expectations:
-  population_size: 1000
+  population_size: 10000
 
 actions:
 
@@ -11,10 +11,48 @@ actions:
       highly_sensitive:
         cohort: output/input.csv
 
-  run_model:
-    run: stata-mp:latest analysis/model.do
+  cohort_checks:
+    run: python:latest python analysis/cohort_checks.py
     needs: [generate_study_population]
     outputs:
       moderately_sensitive:
-        log: logs/model.log
+        cohort: output/cohort_checks.csv
+
+  transform:
+    run: python:latest python analysis/transform.py output/input.csv
+    needs: [generate_study_population]
+    outputs:
+      highly_sensitive:
+        cohort: output/cohort*.pickle
+
+  count_prevalences:
+    run: python:latest python analysis/count_prevalences.py
+    needs: [transform]
+    outputs:
+      moderately_sensitive:
+        table: output/*/tables/prevalences.csv
+
+  compute_uptake_for_paper:
+    run: python:latest python analysis/compute_uptake_for_paper.py
+    needs: [transform]
+    outputs:
+      moderately_sensitive:
+        cohort: output/*/cumulative_coverage/*/*/*.csv
+
+  generate_additional_outputs:
+    run: python:latest python analysis/run_additional_charts.py
+    needs: [transform]
+    outputs:
+      moderately_sensitive:
+        additional_charts: output/*/additional_figures/*.png
+        prac_tables: output/*/additional_figures/*.csv
+
+  generate_outputs:
+    run: python:latest python analysis/run_charts_and_tables.py
+    needs: [transform, compute_uptake_for_paper]
+    outputs:
+      moderately_sensitive:
+        charts: output/*/charts/*.png
+        #reports: output/*/reports/*.html
+        tables: output/*/tables/*.csv
 
