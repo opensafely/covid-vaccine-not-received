@@ -26,7 +26,7 @@ def run():
 
     for emis_path in ["released_outputs/emis/additional_figures/declined_then_accepted_by_wave.csv",
             "released_outputs/emis/additional_figures/declined_accepted_weeks_by_wave.csv"]:
-        combine(emis_path, cumsums=False, indices=2)
+        combine(emis_path, cumsums=False, num_indices=2)
 
     # practice summaries
     for emis_path in (
@@ -34,15 +34,15 @@ def run():
         combine(emis_path, cumsums=False)
     
 
-def combine(emis_path, cumsums=True, indices=1):
+def combine(emis_path, cumsums=True, num_indices=1):
     print(emis_path)
     tpp_path = emis_path.replace("/emis/", "/tpp/")
 
-    indices = np.arange(0,indices)
+    indices = np.arange(0,num_indices)
 
     emis_df = pd.read_csv(emis_path, index_col=indices)
     tpp_df = pd.read_csv(tpp_path, index_col=indices)
-    if cumsums==True:
+    if cumsums:
         combined_df = combine_cumsums(emis_df, tpp_df)
     else:
         combined_df = emis_df + tpp_df

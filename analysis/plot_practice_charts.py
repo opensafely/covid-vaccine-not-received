@@ -65,8 +65,8 @@ def plot_boxplot(df=None, backend=None, output_dir=None):
     '''Boxplot of declines per practice against practice list size. 
     ''' 
     out = df.copy()
-    # ensure that at least 1% of people in each practice have been vaccinated
-    # (those with a v young population e.g. student/military may have small numbers)
+    # drop any practices where fewer than 1% of patients have been vaccinated
+    # (we have filtered to priority patients only so practices with very low vaccination rates at this stage will be very unusual)
     out = out.loc[out["vacc_per_1000"]>10]
 
     # convert practice list sizes to bins
