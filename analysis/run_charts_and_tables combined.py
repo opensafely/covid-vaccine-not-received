@@ -7,11 +7,7 @@ from generate_paper_outputs import run
 import pandas as pd
 import glob
 from groups import groups, at_risk_groups
-
-backend = "combined"
-base_path = f"released_outputs/{backend}"
-start_date = "2020-12-08"
-end_date = "2021-05-25"
+from config_for_combined_outputs import base_path, start_date, end_date
 
 # create cumulative charts
 run(base_path, start_date, end_date)
@@ -53,7 +49,8 @@ def summary_tables():
     demographics = {"age_band": "Age Band", 'sex':'Sex', 'high_level_ethnicity': 'High Level Ethnicity', 'imd_band': 'IMD Band'}
     groups.update(demographics)
 
-    for wave in {'1':'65+','2':'CEV/At Risk','3':'50-64'}:
+    for wave in ['1','2','3']:
+        # (combined waves  '1':'65+', '2':'CEV/At Risk', '3':'50-64')
         df_out = pd.DataFrame()
         for key in ['age_band', 'sex', 'high_level_ethnicity', 'imd_band', 'preg_group', 'sevment_group', 'learndis_group']:
             if (key == 'preg_group') & (wave != '2'):

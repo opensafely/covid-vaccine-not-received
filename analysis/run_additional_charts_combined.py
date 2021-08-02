@@ -5,11 +5,7 @@ from custom_operations import declined_vaccinated
 from generate_extra_combined_charts import plot_grouped_bar, plot_simple_bar
 from plot_practice_charts import *
 import pandas as pd
-
-backend = "combined"
-base_path = f"released_outputs/{backend}"
-start_date = "2020-12-08"
-end_date = "2021-05-25"
+from config_for_combined_outputs import backend, base_path
 
 # plot combined-only charts: declines broken down by priority group and ethnicity/imd
 plot_grouped_bar(backend=backend, output_dir=base_path, breakdown="high_level_ethnicity")
