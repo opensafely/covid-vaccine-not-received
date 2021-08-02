@@ -25,7 +25,7 @@ actions:
       highly_sensitive:
         cohort: output/cohort*.pickle
   
-  cohort_checks:
+  cohort_pickle_checks:
     run: python:latest python analysis/cohort_pickle_checks.py
     needs: [transform]
     outputs:
