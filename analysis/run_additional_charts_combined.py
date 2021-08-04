@@ -1,4 +1,4 @@
-'''This module creates histograms for declines at practice level, and for vaccines declined then received.
+'''This module creates histograms and a heatmap for declines at practice level, and for vaccines declined then received.
 '''
 
 from custom_operations import declined_vaccinated
