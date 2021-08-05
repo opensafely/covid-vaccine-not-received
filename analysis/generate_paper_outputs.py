@@ -188,7 +188,7 @@ def generate_summary_table_for_all(
     summary.to_csv(f"{tables_path}/all{group_type}_{key}.csv", float_format="%.1f%%")
 
 
-def generate_charts_for_all(in_path, charts_path, key, earliest_date, latest_date, title_end, group_type, waves):
+def generate_charts_for_all(in_path, charts_path, key, earliest_date, latest_date, title_end, group_type, waves, exclude_other_group=True):
     uptake = load_uptake(in_path, earliest_date, latest_date)
     if uptake.iloc[-2].max()>1_000_000:
         uptake_total = uptake.iloc[:-1] / 1_000_000
@@ -220,6 +220,8 @@ def generate_charts_for_all(in_path, charts_path, key, earliest_date, latest_dat
         [col for col in wave_column_headings[group_type] if col in uptake_pc.columns]
     ]
     uptake_pc.rename(columns=wave_column_headings[group_type], inplace=True)
+    if exclude_other_group==True:
+        uptake_pc = uptake_pc.drop("Other", 1)
     plot_chart(
         uptake_pc,
         f"Proportion of patients {title_end}",
@@ -361,7 +363,7 @@ def generate_charts_for_wave(
 
 
 def generate_stacked_charts_for_all(
-    base_path, out_path, earliest_date, latest_date, group_type
+    base_path, out_path, earliest_date, latest_date, group_type, exclude_other_group=True
 ):
     title = f"Vaccination and Decline rates\n for each cohort"
     labels = wave_column_headings[group_type]
@@ -387,6 +389,8 @@ def generate_stacked_charts_for_all(
     uptake_pc = compute_uptake_percent(uptake_by_group, labels)
     uptake_pc = uptake_pc[list(wave_column_headings[group_type].values())[2:]]
     uptake_pc = uptake_pc.rename(index=subtitles)
+    if exclude_other_group==True:
+        uptake_pc = uptake_pc.drop("Other", 1)
     uptake_pc = uptake_pc.transpose()
 
     # calculate the proportion with no vaccine for other reasons
@@ -458,7 +462,6 @@ def compute_uptake_percent(uptake, labels):
         # Fixed ascending sort order for age bands
         ordered_cols = [k for k in labels.keys() if k in uptake_pc.columns]
         uptake_pc = uptake_pc[ordered_cols]
-        print(uptake_pc.columns)
     if set(uptake_pc.columns) == {"True", "False"}:
         # This ensures that chart series are always same colour.
         uptake_pc = uptake_pc[["True", "False"]]
