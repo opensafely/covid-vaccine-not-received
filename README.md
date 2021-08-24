@@ -15,8 +15,18 @@ This is the code and configuration for our paper, 'Recording of “COVID-19 vacc
 * We regroup slightly such that 70-79s are all grouped together and the Clinically Extremely Vulnerable (CEV) are in a separate cohort. 
 * We also use combined groups: 1) over 65s (inc care home residents); 2) CEV/At Risk; 3) 50-64. These are denoted as `group2_N` in outputs
 
+# Data processing
+* Data processing files are found in the [analysis](./analysis) folder. 
+* Basic criteria are assessed in the study definition, e.g. age, vaccination dates, dates of diagnosis for various conditions. 
+* The [transform](./analysis/transform.py) step filters and cleans the data and labels patients with their priority group, other factors of interest, and vaccine status. It converts the original csv produced by the study definition step into a `cohort.pickle` file. A number of other modules are called upon to apply groupings:
+  * Clinical groupings (vaccine status, at-risk status etc) are defined in [this file](./analysis/add_groupings.py) e.g. applying AND/OR logic where multiple criteria are to be combined to define a group, or where sequences of events need to be determined. 
+  * Age groups and their limits are defined in [this file](./analysis/age_bands.py). 
+  * Separate files provide the names/descriptions of each of the [ethnic groups](./analysis/ethnicities.py), [at risk groups](./analysis/age_bands.py)
+* The  ['compute uptake'](./analysis/compute_uptake_for_paper.py) step processes the `pickle` file into a series of cumulative incidence files for each event of interest (number of people vaccinated, declined, etc), for each priority group (e.g. 80+), both in total and broken down by each factor of interest (e.g. ethnicity). 
+* Other analyses are separately carried out on the `pickle` file [here](./analysis/custom_operations.py), including patients recorded as declining and later being vaccinated, and levels of recording at each practice.
+
 # Federated analysis
-* Aggregated output files are combined from two different practice EHR systems. After all files are released from both systems, use the following steps to create combined outputs.
+* Aggregated cumulative output files are combined from the two different practice EHR systems. After all files are released from both systems, use the following steps to create combined outputs.
 
 * Process
   1. Run `combine_paper_outputs` - this combines data from both backends including the main cumulative data files of vaccines/declines per day, and also other files including practice-level data and data on declines recorded prior to a later vaccination.
