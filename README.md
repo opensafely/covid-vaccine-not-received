@@ -4,7 +4,7 @@ This project investigates the patterns of usage for codes indicative of patients
 
 This is the code and configuration for our paper, 'Recording of “COVID-19 vaccine declined” among vaccination priority groups: a cohort study on 57.9 million NHS patients’ primary care records in situ using OpenSAFELY'
 
-* The preprint is [here]()
+* The preprint is [here](https://www.medrxiv.org/content/10.1101/2021.08.05.21259863v1) and the paper has been submitted for peer review. 
 * Outputs, including charts, and tables, are in `released_outputs/`
 * If you are interested in how we defined our variables, take a look at the [study definition](analysis/study_definition.py); this is written in `python`, but non-programmers should be able to understand what is going on there
 * If you are interested in how we defined our code lists, look in the [codelists folder](./codelists/).
